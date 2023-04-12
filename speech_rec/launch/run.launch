@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node pkg="speech_rec" type="UI.py" name="UI" required="true" launch-prefix="xterm -title GUI -geometry 100x90-10+350 -fa 'Monospace' -fs 10 -e"/>
+
+	<node pkg="speech_rec" type="detect_word.py" name="detect_word" required="true"  />
+
+	<node pkg="speech_rec" type="moving_control.py" name="moving_control" required="true" />
+
+    <node pkg="speech_rec" type="moving_server.py" name="moving_server" required="true" />
+
+    <node pkg="speech_rec" type="animation_node.py" name="animation_node" required="true" />
+    <node pkg="speech_rec" type="arm_traj_control" name="arm_traj_control" required="true"/>
+
+
+</launch>

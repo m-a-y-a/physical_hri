@@ -10,5 +10,5 @@ Refer to 1:50-3:40 in the tutorial:  https://www.youtube.com/watch?v=izfXL3rIt10
 
 <img src="https://i.imgur.com/G7jKREI.png" width="400">
 
-This repository contains the files in the 'scripts/' folder :)
+This repository contains the files in the 'physical_hri/' package and additional/simulation code :)
 

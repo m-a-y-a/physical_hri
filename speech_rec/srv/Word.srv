@@ -1,0 +1,6 @@
+string word
+---
+int32 mode
+int32 kind
+string name
+string info
