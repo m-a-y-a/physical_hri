@@ -1,0 +1,18 @@
+1. gazebo (ROS tutorials)
+cd tiago_dual_public_ws/
+source ./devel/setup.bash
+roslaunch tiago_dual_gazebo tiago_dual_gazebo.launch public_sim:=true end_effector_left:=pal-gripper end_effector_right:=pal-gripper base_type:=omni_base
+
+OR 
+
+1.  gazebo (custom for HRI demo)
+cd tiago_dual_public_ws/
+source ./devel/setup.bash
+roslaunch tiago_dual_gazebo tiago_dual_gazebo2.launch public_sim:=true end_effector_left:=pal-gripper end_effector_right:=pal-gripper base_type:=omni_base
+
+--------------------------------------------------------------
+
+2. scripts
+cd tiago_dual_public_ws/
+source ./devel/setup.bash
+rosrun physical_hri []
