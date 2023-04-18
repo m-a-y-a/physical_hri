@@ -7,10 +7,15 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from geometry_msgs.msg import Twist, PoseStamped, Pose, Pose2D
 from control_msgs.msg import PointHeadActionGoal
 import numpy as np
+from actionlib import SimpleActionClient
+from pal_interaction_msgs.msg import TtsAction, TtsGoal
+import speech_recognition as sr
+from std_msgs.msg import String
+from std_srvs.srv import Empty
 
 class run_tiago:
 
-    def __init__(self):
+    def __init__(self, mode=1):
 
         self.cnt = 0
         self.gripper_pub = rospy.Publisher("/parallel_gripper_right_controller/command", JointTrajectory, queue_size=5, latch=True)
@@ -20,7 +25,7 @@ class run_tiago:
         self.pose_pub = rospy.Publisher("/cart_pose", Pose2D, queue_size=5)
         self.way_pub = rospy.Publisher("/cart_goal_position", Pose2D, queue_size=5, latch=True)
         self.pose_conv_pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=5)
-        self.mode = 1
+        self.mode = mode
         self.mode_saved = False
         self.rate = rospy.Rate(1)
 
@@ -34,66 +39,91 @@ class run_tiago:
         self.interact_pos = [1.925, 1.75]
         self.table_pos =  [1.925, 2]
 
+        self.listener = sr.Recognizer()
+        
+        self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
+
 
     def run(self):
         while not rospy.is_shutdown():
             if self.mode == 0: # do nothing
                 pass
-            elif self.mode == 1: # straight done, turn
+            elif self.mode == 1: # major moves test
+                
                 rospy.loginfo("Mode is %s" % str(self.mode))
 
                 # Enter the scene
-                #rospy.loginfo("Entering the Scene")
-                self.move_to([1.925, 0, 0], 0)             # move in robot x
-                self.move_to([*self.interact_pos, 0], 1)   # move in robot y 
-                self.move_to([*self.interact_pos, 30], 2)  # turn to user
+                rospy.loginfo("Entering the Scene")
+                self.move_to([1.925, 0, 0], 0)                  # move in robot x
+                self.move_to([*self.interact_pos, 0], 1)        # move in robot y
+                self.move_to([*self.interact_pos, 30], 2)       # turn to user
                 rospy.loginfo("Arrived at Interact")
+                #self.say("Start of interaction")                #say out loud
 
                 # For every object on the inventory table:
                 n = 2 # (2 times to test)
                 for i in range(1, n+1):
                     # Request item
-                    #rospy.loginfo("REQUESTING ITEM #%s" % str(i))
+                    #self.say("Ask user for item")               #say out loud
 
                     # Move to table
                     self.move_to([*self.interact_pos, -90], 2)  # turn
                     self.move_to([*self.table_pos, -90], 0)     # move in robot x
                     rospy.loginfo("Arrived at Table")
+                    #self.say("Pick up item")                    #say out loud
 
                     # Perform Pick and Place
-                    #rospy.loginfo("PICKING UP ITEM")
 
                     # Bring item to user
-                    self.move_to([*self.table_pos, 90], 2)     # turn
-                    self.move_to([*self.interact_pos, 90], 0)  # move in robot x
-                    self.move_to([*self.interact_pos, 30], 2)  # turn
+                    self.move_to([*self.table_pos, 90], 2)      # turn
+                    self.move_to([*self.interact_pos, 90], 0)   # move in robot x
+                    self.move_to([*self.interact_pos, 30], 2)   # turn
                     rospy.loginfo("Arrived at Interact")
-
-                    #rospy.loginfo("HANDING ITEM TO USER")
+                    #self.say("Hand item to user")               #say out loud
                 
                 # End sequence
-                #rospy.loginfo("END GREETING")
+                rospy.loginfo("End of interaction")
+                #self.say("End of interaction")                  #say out loud
 
-                """                
+                self.mode = 0
+                self.mode_saved = False
+
+            elif self.mode == 2: #gripper and arm test
+                rospy.loginfo("Mode is %s" % str(self.mode))
+
                 #Move arm
                 rospy.loginfo("Lifting arm")
                 self.lift_arm()
                 rospy.sleep(2)
 
+                #Grasp
+                self.grasp()
+
+                '''
                 #Gripper to intial position
                 rospy.loginfo("Init gripper")
                 self.move_gripper(0.09)
-                rospy.sleep(2)
+                rospy.sleep(1)
 
                 #Close gripper
                 rospy.loginfo("Close gripper halfway")
                 self.move_gripper(0.044)
-                rospy.sleep(2)
+                rospy.sleep(1)
 
                 #Open gripper
-                rospy.loginfo("Opening gripper")
+                rospy.loginfo("Open gripper")
                 self.move_gripper(0.09) 
-                """
+                '''
+
+                self.mode = 0
+                self.mode_saved = False
+
+            elif self.mode == 3: #speech recognition test
+                rospy.loginfo("Mode is %s" % str(self.mode))
+
+                for i in range(0,2):
+                    self.say("I am listening")
+                    self.send_cmd()
 
                 self.mode = 0
                 self.mode_saved = False
@@ -175,7 +205,7 @@ class run_tiago:
             r.sleep()
         rospy.loginfo("Published base command")
 
-        rospy.sleep(5) #pause for 1 second
+        rospy.sleep(3) #pause for 3 second
 
 
     def move_gripper(self, pos):
@@ -206,12 +236,43 @@ class run_tiago:
         self.group_arm_torso.stop()	
 
         moveit_commander.roscpp_shutdown()
+
+    def say(self, text):
+        client = SimpleActionClient('/tts', TtsAction)
+        client.wait_for_server()
+        goal = TtsGoal()
+        goal.rawtext.text = text
+        goal.rawtext.lang_id = "en_GB"
+        client.send_goal_and_wait(goal)
+        return
+    
+    def get_voice_cmd(self):
+        try:
+            with sr.Microphone as src:
+                self.listener.adjust_for_ambient_noise(src)
+                audio = self.listener.listen(src)
+                cmd = self.listener.recognize_google(audio, language = "en-EN")
+                cmd = cmd.lower()        
+                return cmd
+        except Exception as e:
+            rospy.logerr("Exception %s occurred", str(e))
+
+    def send_cmd(self):
+        cmd = self.get_voice_cmd()
+        rospy.logdebug("Voice detected %s", cmd)
+        if (cmd == "hello"):
+            self.say(cmd)
+        elif(cmd == "good"):
+            self.say(cmd)
+        elif (cmd == "thank you"):
+            self.say("you are welcome")
+
     
 def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago()
+    tiago = run_tiago(mode=1)
     rospy.loginfo("Node and server initialized")
     tiago.run()
 
