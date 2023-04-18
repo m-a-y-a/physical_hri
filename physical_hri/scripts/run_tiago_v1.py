@@ -29,10 +29,8 @@ class run_tiago:
 
         self.linear_speed = rospy.get_param("~start_linear_speed", 0.2) #m/s
         self.angular_speed = rospy.get_param("~start_angular_speed", 0.5) #rad/s
-        self.global_origin = np.array([0, 0, 0])
-        self.current_state = np.array([0, 0, 0])
-        self.interact_pos = [1.925, 1.75]
-        self.table_pos =  [1.925, 2]
+        self.distance_prev = 0
+        self.radians_prev = 0
 
 
     def run(self):
@@ -42,39 +40,15 @@ class run_tiago:
             elif self.mode == 1: # straight done, turn
                 rospy.loginfo("Mode is %s" % str(self.mode))
 
-                # Enter the scene
-                #rospy.loginfo("Entering the Scene")
-                self.move_to([1.925, 0, 0], 0)             # move in robot x
-                self.move_to([*self.interact_pos, 0], 1)   # move in robot y 
-                self.move_to([*self.interact_pos, 30], 2)  # turn to user
-                rospy.loginfo("Arrived at Interact")
+                #Move base 
+                rospy.loginfo("Facing user")
+                radians = math.asin(1.25/(1.75-0.275)) + (-0.45) #radian_offset=-0.45rad
+                self.move_base(radians, 2)
+                rospy.sleep(1)
+                self.radians_prev = radians
+                self.base_pub.publish(Twist())
+                rospy.sleep(1)
 
-                # For every object on the inventory table:
-                n = 2 # (2 times to test)
-                for i in range(1, n+1):
-                    # Request item
-                    #rospy.loginfo("REQUESTING ITEM #%s" % str(i))
-
-                    # Move to table
-                    self.move_to([*self.interact_pos, -90], 2)  # turn
-                    self.move_to([*self.table_pos, -90], 0)     # move in robot x
-                    rospy.loginfo("Arrived at Table")
-
-                    # Perform Pick and Place
-                    #rospy.loginfo("PICKING UP ITEM")
-
-                    # Bring item to user
-                    self.move_to([*self.table_pos, 90], 2)     # turn
-                    self.move_to([*self.interact_pos, 90], 0)  # move in robot x
-                    self.move_to([*self.interact_pos, 30], 2)  # turn
-                    rospy.loginfo("Arrived at Interact")
-
-                    #rospy.loginfo("HANDING ITEM TO USER")
-                
-                # End sequence
-                #rospy.loginfo("END GREETING")
-
-                """                
                 #Move arm
                 rospy.loginfo("Lifting arm")
                 self.lift_arm()
@@ -86,62 +60,18 @@ class run_tiago:
                 rospy.sleep(2)
 
                 #Close gripper
-                rospy.loginfo("Close gripper halfway")
-                self.move_gripper(0.044)
+                rospy.loginfo("Close gripper")
+                self.move_gripper(-0.01)
                 rospy.sleep(2)
 
                 #Open gripper
                 rospy.loginfo("Opening gripper")
-                self.move_gripper(0.09) 
-                """
+                self.move_gripper(0.09)
 
                 self.mode = 0
                 self.mode_saved = False
 
             self.rate.sleep()
-
-    def move_to(self, desired_state, desired_dir):
-        # calculate amount to move in x, y, or radial directions
-        # send move command to move_base() function
-        # updates current state
-
-        # calculate desired movement in global coordinate frame
-        desired_state = np.array(desired_state)
-        x_d = desired_state[0] - self.current_state[0] 
-        y_d = desired_state[1] - self.current_state[1]
-        th_d = math.radians((desired_state[2] - self.current_state[2]))
-
-        # transform to robot local frame
-        if self.current_state[2] == 0:
-            # global: +x, -x, +y, -y 
-            # local: +x, -x, -y, +y
-            y_d = -y_d
-        elif self.current_state[2] < 0 : #CW
-            # global: +x, -x, +y, -y 
-            # local: +y, -y, +x, -x
-            y_d, x_d = x_d, y_d 
-        elif self.current_state[2] > 0: #CCW
-            # global: +x, -x, +y, -y 
-            # local: -y, +y, -x, +x
-            y_d, x_d = x_d, y_d 
-            x_d = -x_d
-            y_d = -y_d
-
-        # execute movement of base
-        if desired_dir != None:
-            if desired_dir == 0:
-                self.move_base(x_d, 0) #move in x
-                #rospy.loginfo("Moved in local x by %s" % str(x_d))
-            elif desired_dir == 1:
-                self.move_base(y_d, 1) #move in y
-                #rospy.loginfo("Moved in local y by %s" % str(y_d))
-            elif desired_dir == 2:
-                self.move_base(th_d, 2) #turn in theta
-                #rospy.loginfo("Turned by %s" % str(math.degrees(th_d)))
-
-        self.current_state = desired_state
-        #rospy.loginfo("Now at: [%s]" % ",".join(str(x) for x in self.current_state))
-
     
     def move_base(self, distance, direction):
         """
@@ -158,14 +88,14 @@ class run_tiago:
 
         # Calculating variables to reach goal
         if direction == 0:
-            time = round(abs(distance)/self.linear_speed)
+            time = round(distance/self.linear_speed)
             pub_msg.linear.x = distance/time #slightly vary linear speed
         if direction == 1 :
-            time = round(abs(distance)/self.linear_speed)
+            time = round(distance/self.linear_speed)
             pub_msg.linear.y = distance/time #slightly vary linear speed
         if direction == 2 :
-            time = round(abs(distance)/self.angular_speed)
-            pub_msg.angular.z = distance/time #slightly vary angular speed 
+            time = round(distance/self.angular_speed)
+            pub_msg.angular.z = -distance/time #slightly vary angular speed 
 
         # Publishing the goal according to the time duration of the 
         # client's request
@@ -174,8 +104,6 @@ class run_tiago:
             self.base_pub.publish(pub_msg)
             r.sleep()
         rospy.loginfo("Published base command")
-
-        rospy.sleep(5) #pause for 1 second
 
 
     def move_gripper(self, pos):

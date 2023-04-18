@@ -85,7 +85,7 @@ if __name__ == '__main__':
         rospy.loginfo("Moving to table right corner")
         # publish
         radians = (math.pi - radians_prev) + (-0.75) #radian_offset=-0.75rad
-        distance = (1.75 - 0.58) + (-0.7) #distance_offset=-0.7m
+        distance = (1.75 - 0.58) + (-0.73) #distance_offset=-0.73m
         tiago.move_base(radians, 2)
         rospy.sleep(1)
         tiago.move_base(distance, 0)
