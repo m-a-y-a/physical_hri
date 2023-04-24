@@ -1,19 +1,34 @@
 #! /usr/bin/env python
-import rospy
 import math
 import sys
+import cv2
 from std_msgs.msg import Int16
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, PointHeadActionGoal
 from geometry_msgs.msg import Twist, PoseStamped, Pose, Pose2D
-from control_msgs.msg import PointHeadActionGoal
+from sensor_msgs.msg import Image, CameraInfo
 import numpy as np
 from actionlib import SimpleActionClient
 from pal_interaction_msgs.msg import TtsAction, TtsGoal
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
-import speech_recognition as sr
 from std_msgs.msg import String
 from std_srvs.srv import Empty
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, PointHeadActionGoal
+from cv_bridge import CvBridge
+# import rospy
+# import math
+# import sys
+# from std_msgs.msg import Int16
+# from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+# from geometry_msgs.msg import Twist, PoseStamped, Pose, Pose2D
+# from control_msgs.msg import PointHeadActionGoal
+# import numpy as np
+# from actionlib import SimpleActionClient
+# from pal_interaction_msgs.msg import TtsAction, TtsGoal
+# from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
+# import speech_recognition as sr
+# from std_msgs.msg import String
+# from std_srvs.srv import Empty
+# from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, PointHeadActionGoal
 
 class run_tiago:
 
