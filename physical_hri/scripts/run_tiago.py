@@ -128,7 +128,7 @@ class run_tiago:
             rospy.loginfo("Mode is %s" % str(self.mode))
 
             # Move torso up to inventory table
-            self.move_torso(0.25)
+            self.move_torso(self.torso_height_table)
 
             # Lift arm
             rospy.loginfo("Lifting arm")
@@ -137,15 +137,15 @@ class run_tiago:
 
             # ----------- Pick up object at table ------------
             # Look down
-            self.move_head_to_position(0.03, -0.47)
+            self.move_head_to_position(self.head_rot_table)
             # Move arm 
-            self.move_arm([-1.2, -1.2, -0.79, -0.39, -2.1, -1.4, -2.1])
+            self.move_arm(self.right_arm_full_extension)
             # Grasp
             self.grasp()
             # ------------------------------------------------
 
             # Move torso down to little table
-            self.move_torso(0.05)
+            self.move_torso(self.torso_height_dropoff_table)
 
             '''
             #Gripper to intial position
@@ -377,7 +377,10 @@ class run_tiago:
             rosnode.kill_nodes([node_name])
 
 
-    def move_head_to_position(self, head_1, head_2):
+    def move_head_to_position(self, pos):
+        head_1 = pos[0]
+        head_2 = pos[1]
+
         # Create a publisher to send joint trajectory commands
         pub = rospy.Publisher('/head_controller/command', JointTrajectory, queue_size=10)
         pub_head_manager = rospy.Publisher('/pal_head_manager')
