@@ -404,7 +404,7 @@ class run_tiago:
         pub.publish(traj_msg)
 
         # disable head movement
-        keep_head_still()
+        self.keep_head_still()
 
 
     
