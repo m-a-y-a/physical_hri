@@ -2,7 +2,6 @@
 import rospy
 import math
 import sys
-# moveit_commander
 from std_msgs.msg import Int16
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from geometry_msgs.msg import Twist, PoseStamped, Pose, Pose2D
@@ -32,15 +31,23 @@ class run_tiago:
         self.mode_saved = False
         self.rate = rospy.Rate(1)
 
+        # Camera info
+        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_aruco)
+        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_aruco)
+        self.bridge = CvBridge()
+
+        # Client for preset motions
         self.ac = SimpleActionClient('/play_motion', PlayMotionAction)
         rospy.loginfo("Connecting to /play_motion...")
 
         self.arm = SimpleActionClient('/arm_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
-        # self.group_arm_torso = moveit_commander.MoveGroupCommander("arm_right_torso")
-        # self.torso_arm_joint_goal = self.group_arm_torso.get_current_joint_values()
-
+        # class variables
+        self.camera_info = None
+        self.dist_coeffs = None
+        self.K = None
+        self.cv_image = None
         self.linear_speed = rospy.get_param("~start_linear_speed", 0.2) #m/s
         self.angular_speed = rospy.get_param("~start_angular_speed", 0.3) #rad/s
         self.global_origin = np.array([0, 0, 0])
@@ -57,6 +64,7 @@ class run_tiago:
         self.torso_height_dropoff_table = 0.05
         self.head_rot_table = [0.03, -0.47]
 
+        # Speech recogniser
         self.listener = sr.Recognizer()
         
         self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
@@ -147,22 +155,6 @@ class run_tiago:
             # Move torso down to little table
             self.move_torso(self.torso_height_dropoff_table)
 
-            '''
-            #Gripper to intial position
-            rospy.loginfo("Init gripper")
-            self.move_gripper(0.09)
-            rospy.sleep(1)
-
-            #Close gripper
-            rospy.loginfo("Close gripper halfway")
-            self.move_gripper(0.044)
-            rospy.sleep(1)
-
-            #Open gripper
-            rospy.loginfo("Open gripper")
-            self.move_gripper(0.09) 
-            '''
-
             self.mode = 0
             self.mode_saved = False
 
@@ -187,6 +179,10 @@ class run_tiago:
 
 
             self.rate.sleep()
+        elif self.mode == 5:
+            x_diff, y_diff = self.get_aruco_distance(msg)
+            rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
+            
 
     def move_to(self, desired_state, desired_dir):
         # calculate amount to move in x, y, or radial directions
@@ -277,23 +273,6 @@ class run_tiago:
         joint_msg.points.append(p)
         self.gripper_pub.publish(joint_msg)
         rospy.loginfo("Published grip command")
-
-    # def lift_arm(self):
-    #     moveit_commander.roscpp_initialize(sys.argv)
-
-    #     target = [0.15, 1.5, 0.58, 0.06, 1.0, -1.70, 0.0, 0.0]
-
-    #     #Pass values for joint angles...and move the robot
-    #     joint_goal = self.group_arm_torso.get_current_joint_values()
-    #     print(joint_goal)
-    #     for i in range(len(target)):
-    #         rospy.loginfo("\t" + str(i) + " goal position: " + str(target[i]))
-    #         joint_goal[i] = target[i]
-        
-    #     self.group_arm_torso.go(joint_goal, wait=True)
-    #     self.group_arm_torso.stop()   
-
-    #     moveit_commander.roscpp_shutdown()
 
     def say(self, text):
         client = SimpleActionClient('/tts', TtsAction)
@@ -405,6 +384,84 @@ class run_tiago:
 
         # disable head movement
         self.keep_head_still()
+
+    def get_aruco(self, data):
+        # Convert image data to OpenCV format
+        self.cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
+        
+        # Access the camera intrinsic parameters
+        self.camera_info = data.camera_info
+        
+        # Construct the camera matrix from intrinsic parameters
+        self.K = np.array(camera_info.K).reshape(3, 3)
+        
+        # Construct the distortion coefficients
+        self.dist_coeffs = np.array(camera_info.D)
+        
+    def get_aruco_distance(self, item):
+        # Define the ArUco dictionary and parameters
+        aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_1000)
+        aruco_params = cv2.aruco.DetectorParameters_create()
+        
+        # Detect the markers in the image
+        corners, ids, rejected_img_points = cv2.aruco.detectMarkers(self.cv_image, aruco_dict, parameters=aruco_params)
+        
+        # Check if any markers were detected
+        if ids is not None:
+            table_p_c = np.array([0, 0, 0])
+            # Loop over all detected markers
+            for i in range(len(ids)):
+                if (i == ):
+                    # Access the corners of the ith detected marker
+                    marker_corners = corners[i][0]
+                    
+                    # Compute the center of the marker
+                    marker_center = np.mean(marker_corners, axis=0)
+                    
+                    # Convert the center point to a normalized ray in camera coordinates
+                    cx = camera_info.width / 2.0
+                    cy = camera_info.height / 2.0
+                    fx = K[0, 0]
+                    fy = K[1, 1]
+                    x_c = (marker_center[0] - cx) / fx
+                    y_c = (marker_center[1] - cy) / fy
+                    z_c = 1.0
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    
+                    # Convert the point to 3D coordinates in the camera frame
+                    table_p_c = np.array([x_c, y_c, z_c])
+                    
+                if (i == item):
+                    # Calculate distance
+                    # Access the corners of the ith detected marker
+                    marker_corners = corners[i][0]
+                    
+                    # Compute the center of the marker
+                    marker_center = np.mean(marker_corners, axis=0)
+                    
+                    # Convert the center point to a normalized ray in camera coordinates
+                    cx = camera_info.width / 2.0
+                    cy = camera_info.height / 2.0
+                    fx = K[0, 0]
+                    fy = K[1, 1]
+                    x_c = (marker_center[0] - cx) / fx
+                    y_c = (marker_center[1] - cy) / fy
+                    z_c = 1.0
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    
+                    # Convert the point to 3D coordinates in the camera frame
+                    p_c = np.array([x_c, y_c, z_c])
+                    
+                    # Calculate distance between table center and object
+                    x_diff = table_p_c[0] - p_c[0]
+                    y_diff = table_p_c[1] - p_c[1]
+                    return (x_diff, y_diff)
+                    
+                else:
+                    # No object found
+                    # Reply
+                    self.say("Sorry, I don't recognize that object")
+                    return (None, None)
 
 
     

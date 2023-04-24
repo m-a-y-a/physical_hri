@@ -56,6 +56,12 @@ class run_tiago:
         self.free_space = [1.25, 1.75]      # center of the "room"
         self.table_pos =  [1.925, 2.30]     # table to pick up objects
         self.drop_off_pos = [2.00, 0.90]    # drop off table
+
+        self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
+        self.right_arm_front_items = [1.46, 1.02, 0.09, 1.32, -1.48, -0.34, 0.00]
+        self.torso_height_table = 0.25
+        self.torso_height_dropoff_table = 0.05
+        self.head_rot_table = [0.03, -0.47]
         
         self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
         
@@ -163,7 +169,7 @@ class run_tiago:
             self.say("Yes, I will get you the " + msg)
             
             # Move torso up
-            self.move_torso(#)
+            self.move_torso(torso_height_table) # add here later
             
             # Offer arm
             self.play_motion('offer_right', block = True)
@@ -181,15 +187,15 @@ class run_tiago:
             
             # Call AruCo tag identifier
             x_diff, y_diff = self.get_aruco_distance(msg)
-            self.move_to([self.table_pos[0], self.table_pos[1] + x_diff, 1) # move side to side
-            self.move_to([self.table_pos[0] + y_diff, self.table_pos[1], 0) # move forward
+            self.move_to([self.table_pos[0], self.table_pos[1] + x_diff], 1) # move side to side
+            self.move_to([self.table_pos[0] + y_diff, self.table_pos[1]], 0) # move forward
 
             # Grab item
             self.move_gripper(-.044)
 
             # Move back to table center
-            self.move_to([self.table_pos[0], self.table_pos[1] - x_diff, 1) # move side to side
-            self.move_to([self.table_pos[0] - y_diff, self.table_pos[1], 0) # move backwards
+            self.move_to([self.table_pos[0], self.table_pos[1] - x_diff], 1) # move side to side
+            self.move_to([self.table_pos[0] - y_diff, self.table_pos[1]], 0) # move backwards
 
             # Bring item to user
             self.move_to([self.table_pos[0], self.table_pos[1], -90], 2)       # turn left
@@ -199,7 +205,7 @@ class run_tiago:
             rospy.loginfo("Arrived at drop off")
             
             # Lower torso
-            self.move_torso(#)
+            self.move_torso(torso_height_dropoff_table) # add here later
             
             # Release item
             self.move_gripper(.09)
