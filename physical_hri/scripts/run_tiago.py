@@ -14,6 +14,7 @@ from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 import speech_recognition as sr
 from std_msgs.msg import String
 from std_srvs.srv import Empty
+from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, PointHeadActionGoal
 
 class run_tiago:
 
