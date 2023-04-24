@@ -50,10 +50,9 @@ class run_tiago:
         self.table_pos =  [1.925, 2] # table to pick up objects
         self.drop_off_pos = [2.0, 0.3] # drop off table
 
-        self.arm_joints = []
+        self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
         self.torso_height_table = 0.25
         self.torso_height_dropoff_table = 0.05
-        self.
         self.head_rot_table = [0.03, -0.47]
 
         self.listener = sr.Recognizer()
@@ -152,7 +151,7 @@ class run_tiago:
             # ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
 
             self.move_torso(0.25)
-            self..move_arm
+            self.move_arm
 
             self.mode = 0
             self.mode_saved = False
