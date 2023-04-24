@@ -449,7 +449,7 @@ class run_tiago:
             table_p_c = np.array([0, 0, 0])
             # Loop over all detected markers
             for i in range(len(ids)):
-                if (i == ):
+                if (i == 0): # IDK ABOUT THIS @CAROLYNE
                     # Access the corners of the ith detected marker
                     marker_corners = corners[i][0]
                     
