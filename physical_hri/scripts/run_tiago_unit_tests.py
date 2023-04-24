@@ -136,24 +136,30 @@ class run_tiago:
             rospy.loginfo("Mode is %s" % str(self.mode))
 
             # Move torso up to inventory table
-            self.move_torso(self.torso_height_table)
+            self.move_joint(['torso_lift_joint'], self.torso_height_table, [0.1])
+            # self.move_torso(self.torso_height_table)
 
             # Lift arm
             rospy.loginfo("Lifting arm")
             self.play_motion('offer_right', block=True)
             rospy.sleep(2)
 
+            # maybe move forward here
+
             # ----------- Pick up object at table ------------
             # Look down
             self.move_head_to_position(self.head_rot_table)
             # Move arm 
-            self.move_arm(self.right_arm_full_extension)
+            arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+            self.move_joint(arm_joints, self.right_arm_full_extension)
+            # self.move_arm(self.right_arm_full_extension)
             # Grasp
             self.grasp()
             # ------------------------------------------------
 
             # Move torso down to little table
-            self.move_torso(self.torso_height_dropoff_table)
+            # self.move_torso(self.torso_height_dropoff_table)
+            self.move_joint(['torso_lift_joint'], self.torso_height_dropoff_table, [0.1])
 
             self.mode = 0
             self.mode_saved = False
@@ -182,7 +188,7 @@ class run_tiago:
         elif self.mode == 5:
             x_diff, y_diff = self.get_aruco_distance(msg)
             rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
-            
+
 
     def move_to(self, desired_state, desired_dir):
         # calculate amount to move in x, y, or radial directions
@@ -325,16 +331,47 @@ class run_tiago:
         else:
             self.ac.send_goal(g)
 
-    def move_torso(self, height):
-        goal = FollowJointTrajectoryGoal()
-        goal.trajectory.joint_names = ['torso_lift_joint']
+
+    def move_joint(self, joint_names, joint_positions, joint_velocities=None):
+        trajectory = JointTrajectory()
+        trajectory.joint_names = joint_names
+
         jtp = JointTrajectoryPoint()
-        jtp.positions = [height]
-        jtp.velocities = [0.1]
-        jtp.time_from_start = rospy.Duration(2.0)
-        goal.trajectory.points.append(jtp)
-        self.torso.send_goal(goal)
-        self.torso.wait_for_result()
+        trajectory.points.append(jtp)
+        trajectory.points[0].positions = joint_positions
+        if joint_velocities is not None:
+            trajectory.points[0].velocities = joint_velocities
+        trajectory.points[0].time_from_start = rospy.Duration(2.0)
+
+        goal_pos = FollowJointTrajectoryGoal()
+        goal_pos.trajectory = trajectory
+        goal_pos.goal_time_tolerance = rospy.Duration(0)
+        joint.send_goal(goal_pos)
+        joint.wait_for_result()
+
+    def move_torso(self, height):
+        # goal = FollowJointTrajectoryGoal()
+        goal = JointTrajectory()
+        # call joint trajectroy^
+        goal.joint_names = ['torso_lift_joint']
+        jtp = JointTrajectoryPoint()
+
+        goal.points.append(jtp)
+        goal.points[0].positions = [height]
+        goal.points[0].velocities = [0.1]
+        goal.points[0].time_from_start = rospy.Duration(2.0)
+
+        joint_gol_pos = FollowJointTrajectoryGoal()
+        joint_gol_pos.trajectory = goal 
+        joint_gol_pos.goal_time_tolerance = rospy.Duration(0)
+        joint.send_goal(joint_gol_pos)
+        joint.wait_for_result()
+        # jtp.positions = [height]
+        # jtp.velocities = [0.1]
+        # jtp.time_from_start = rospy.Duration(2.0)
+        # goal.trajectory.points.append(jtp)
+        # self.torso.send_goal(goal)
+        # self.torso.wait_for_result()
      
     def move_arm(self, pos):
         goal = FollowJointTrajectoryGoal()
@@ -344,7 +381,7 @@ class run_tiago:
         jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
         jtp.time_from_start = rospy.Duration(2.0)
         goal.trajectory.points.append(jtp)
-        self.arm.send_goal(goal)
+        self.arm.send_goal(goal) #[server, coordinates] [torso, torso lift joint, [0.25]?]
         self.arm.wait_for_result()
 
     def keep_head_still(self):
