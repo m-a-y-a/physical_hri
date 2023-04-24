@@ -125,13 +125,25 @@ class run_tiago:
         elif self.mode == 2: #gripper and arm test
             rospy.loginfo("Mode is %s" % str(self.mode))
 
-            # #Move arm
-            # rospy.loginfo("Lifting arm")
-            # self.lift_arm()
-            # rospy.sleep(2)
+            # Move torso up to inventory table
+            self.move_torso(0.25)
 
-            # #Grasp
-            # self.grasp()
+            # Lift arm
+            rospy.loginfo("Lifting arm")
+            self.play_motion('offer_right', block=True)
+            rospy.sleep(2)
+
+            # ----------- Pick up object at table ------------
+            # Look down
+            self.move_head_to_position(0.03, -0.47)
+            # Move arm 
+            self.move_arm([-1.2, -1.2, -0.79, -0.39, -2.1, -1.4, -2.1])
+            # Grasp
+            self.grasp()
+            # ------------------------------------------------
+
+            # Move torso down to little table
+            self.move_torso(0.05)
 
             '''
             #Gripper to intial position
@@ -148,10 +160,6 @@ class run_tiago:
             rospy.loginfo("Open gripper")
             self.move_gripper(0.09) 
             '''
-            # ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-
-            self.move_torso(0.25)
-            self.move_arm
 
             self.mode = 0
             self.mode_saved = False
