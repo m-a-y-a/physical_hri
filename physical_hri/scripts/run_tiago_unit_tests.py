@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import rospy
 import math
 import sys
 import cv2
@@ -14,21 +15,7 @@ from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 from cv_bridge import CvBridge
-import rospy
-import math
-import sys
-from std_msgs.msg import Int16
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from geometry_msgs.msg import Twist, PoseStamped, Pose, Pose2D
-from control_msgs.msg import PointHeadActionGoal
-import numpy as np
-from actionlib import SimpleActionClient
-from pal_interaction_msgs.msg import TtsAction, TtsGoal
-from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 import speech_recognition as sr
-from std_msgs.msg import String
-from std_srvs.srv import Empty
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, PointHeadActionGoal
 
 class run_tiago:
 
@@ -151,7 +138,7 @@ class run_tiago:
             rospy.loginfo("Mode is %s" % str(self.mode))
 
             # Move torso up to inventory table
-            self.move_joint(['torso_lift_joint'], self.torso_height_table, [0.1])
+            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
             # self.move_torso(self.torso_height_table)
 
             # Lift arm
@@ -166,7 +153,7 @@ class run_tiago:
             self.move_head_to_position(self.head_rot_table)
             # Move arm 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            self.move_joint(arm_joints, self.right_arm_full_extension)
+            self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
             # self.move_arm(self.right_arm_full_extension)
             # Grasp
             self.grasp()
@@ -174,7 +161,7 @@ class run_tiago:
 
             # Move torso down to little table
             # self.move_torso(self.torso_height_dropoff_table)
-            self.move_joint(['torso_lift_joint'], self.torso_height_dropoff_table, [0.1])
+            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_dropoff_table, [0.1])
 
             self.mode = 0
             self.mode_saved = False
@@ -348,7 +335,7 @@ class run_tiago:
             self.ac.send_goal(g)
 
 
-    def move_joint(self, joint_names, joint_positions, joint_velocities=None):
+    def move_joint(self, joint, joint_names, joint_positions, joint_velocities=None):
         trajectory = JointTrajectory()
         trajectory.joint_names = joint_names
 
