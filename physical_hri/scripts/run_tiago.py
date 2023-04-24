@@ -52,6 +52,7 @@ class run_tiago:
         self.drop_off_pos = [2.0, 0.3] # drop off table
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
+        self.right_arm_front_items = [1.46, 1.02, 0.09, 1.32, -1.48, -0.34, 0.00]
         self.torso_height_table = 0.25
         self.torso_height_dropoff_table = 0.05
         self.head_rot_table = [0.03, -0.47]
