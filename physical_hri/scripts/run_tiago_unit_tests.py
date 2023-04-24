@@ -270,15 +270,16 @@ class run_tiago:
 
     def move_gripper(self, pos):
         #gripper is -0.09 to close and 0.09 to open
-        joint_msg = JointTrajectory()
-        joint_msg.joint_names = ["parallel_gripper_joint"]
+        move_joint(["parallel_gripper_joint"], [pos])
+        # joint_msg = JointTrajectory()
+        # joint_msg.joint_names = ["parallel_gripper_joint"]
 
-        p = JointTrajectoryPoint()
-        p.positions = [pos] 
-        p.time_from_start = rospy.rostime.Duration(1)
-        joint_msg.points.append(p)
-        self.gripper_pub.publish(joint_msg)
-        rospy.loginfo("Published grip command")
+        # p = JointTrajectoryPoint()
+        # p.positions = [pos] 
+        # p.time_from_start = rospy.rostime.Duration(1)
+        # joint_msg.points.append(p)
+        # self.gripper_pub.publish(joint_msg)
+        # rospy.loginfo("Published grip command")
 
     def say(self, text):
         client = SimpleActionClient('/tts', TtsAction)
