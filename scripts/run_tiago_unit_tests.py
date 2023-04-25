@@ -48,7 +48,7 @@ class run_tiago:
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # class variables
-        self.aruco_dictionary = {"water bottle": 8, "medicine bottle": 12, "oats": 11, "mixed nuts": 10, "CHECK THIS ONE": 9}
+        self.aruco_dictionary = {"water bottle": 8, "pill bottle": 12, "oats": 11, "mixed nuts": 10, "CHECK THIS ONE": 9}
         self.camera_info = None
         self.dist_coeffs = None
         self.K = None
@@ -127,6 +127,7 @@ class run_tiago:
 
             rospy.loginfo("offering right")
             self.play_motion('offer_right')
+            # client.wait_for_result()
 
             rospy.loginfo("moving torso")
             self.move_torso2(self.torso_height_dropoff_table)
@@ -386,6 +387,7 @@ class run_tiago:
             self.ac.send_goal_and_wait(g)
         else:
             self.ac.send_goal(g)
+            self.ac.wait_for_result()
 
 
     def move_joint(self, joint, joint_names, joint_positions, joint_velocities=None):
@@ -402,7 +404,7 @@ class run_tiago:
         goal_pos = FollowJointTrajectoryGoal()
         goal_pos.trajectory = trajectory
         goal_pos.goal_time_tolerance = rospy.Duration(0)
-        joint.wait_for_server(timeout=rospy.Duration(5))
+        joint.wait_for_server()
         
         joint.send_goal(goal_pos)
         joint.wait_for_result()
@@ -410,7 +412,7 @@ class run_tiago:
     
     def move_torso2(self, height):
         client = SimpleActionClient('torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-        client.wait_for_server(timeout=rospy.Duration(5))
+        client.wait_for_server()
 
         jtp = JointTrajectoryPoint()
         jtp.time_from_start = rospy.Duration(2)
@@ -423,6 +425,7 @@ class run_tiago:
 
         # Callbacks are not handled right now
         client.send_goal(goal)
+        client.wait_for_result()
      
     # def move_arm(self, pos):
     #     goal = FollowJointTrajectoryGoal()
