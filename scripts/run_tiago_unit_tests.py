@@ -80,13 +80,13 @@ class run_tiago:
         elif self.mode == 1: #gripper and arm test
             rospy.loginfo("Mode is %s" % str(self.mode))
 
-            # Move torso up to inventory table
-            self.move_torso2(self.torso_height_table)
-
             # Lift arm
             rospy.loginfo("Lifting arm")
             self.play_motion('offer_right', block=True)
             rospy.sleep(2)
+
+            # Move torso up to inventory table
+            self.move_torso2(self.torso_height_table)
 
             # maybe move forward here
 
@@ -148,7 +148,7 @@ class run_tiago:
 
         arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
         rospy.loginfo("moving arm right diff publisher")
-        self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension) # doesnt error but doesnt moove any more
+        self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension) # doesnt error but doesnt move any more
         self.mode = 0
         self.mode_saved = False
 
@@ -460,6 +460,7 @@ class run_tiago:
     def get_aruco(self, data):
         # Convert image data to OpenCV format
         self.cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
+        print(self.cv_image)
         
         # Access the camera intrinsic parameters
         self.camera_info = data.camera_info
@@ -477,6 +478,8 @@ class run_tiago:
         
         # Detect the markers in the image
         corners, ids, rejected_img_points = cv2.aruco.detectMarkers(self.cv_image, aruco_dict, parameters=aruco_params)
+        rospy.loginfo("ids found {0}".format(ids))
+        print("ids found")
         
         # Check if any markers were detected
         if ids is not None:

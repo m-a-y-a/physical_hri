@@ -43,7 +43,7 @@ def get_aruco_distance():
             # Loop over all detected markers
             all_markers = [100, 200, 300, 400, 500, 600]
             for i in range(len(ids)):
-                if (ids[i] == 600): # IDK ABOUT THIS @CAROLYNE
+                if (ids[i] == 6): # IDK ABOUT THIS @CAROLYNE
                     # Access the corners of the ith detected marker
                     marker_corners = corners[i][0]
                     
@@ -58,8 +58,8 @@ def get_aruco_distance():
                     # Convert the center point to a normalized ray in camera coordinates
                     cx = camera_info_width / 2.0
                     cy = camera_info_height / 2.0
-                    fx = K[0, 0]
-                    fy = K[1, 1]
+                    fx = K[0]
+                    fy = K[4]
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
@@ -73,7 +73,7 @@ def get_aruco_distance():
                     plt.show()
 
                     
-                if (i == item):
+                if (i != 6):
                     # Calculate distance
                     # Access the corners of the ith detected marker
                     marker_corners = corners[i][0]
