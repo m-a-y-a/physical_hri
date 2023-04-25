@@ -59,7 +59,8 @@ class run_tiago:
         # self.interact_pos = [1.925, 1.75] # inwards 1.925 m and upwards 1.75
         self.free_space = [1.25, 1.5] # center of the "room"
         self.table_pos =  [1.925, 2] # table to pick up objects
-        self.drop_off_pos = [2.0, 0.3] # drop off table
+        #self.drop_off_pos = [2.0, 0.3] # drop off table
+        self.drop_off_pos = [2.00, 0.90]
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
         self.right_arm_front_items = [1.46, 1.02, 0.09, 1.32, -1.48, -0.34, 0.00]
@@ -174,7 +175,7 @@ class run_tiago:
             # Perform Pick and Place
 
             # Bring item to user
-            self.free_space_to_table()
+            self.table_to_dropoff()
 
             # reset: move back to center
             self.dropoff_to_free_space()
@@ -207,24 +208,37 @@ class run_tiago:
         self.move_to([self.table_pos[0], self.free_space[1], -90], 2) # turn to face table
         self.move_to([self.table_pos[0], self.table_pos[1], -90], 0) # move to in front of table
         rospy.loginfo("Arrived at Table")
-
-    def free_space_to_table(self):
+        
+    def table_to_dropoff(self):
+        '''
         self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
         self.move_to([self.table_pos[0], self.free_space[1], 90], 2) # turn to front of room
         self.move_to([self.table_pos[0], self.drop_off_pos[1], 90], 0) # move to y = 0.25
         self.move_to([self.table_pos[0], self.drop_off_pos[1], 0], 2) # turn to drop off table
         self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 0], 0) # move to x = 2.15 in front of drop off table
+        '''
+
+        self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
+        self.move_to([self.table_pos[0], self.free_space[1], 0], 2) # turn 
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 0], 0) # move forward
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 2) # turn
+        self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0) # move forward
         rospy.loginfo("Arrived at drop off")
 
 
     def dropoff_to_free_space(self):
          # reset: move back to center
+        '''
         self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
         self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
         self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
         self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
+        '''
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0) # move back
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2) # turn 
+        self.move_to([self.free_space[0], self.free_space[1], 180], 0) # move forward
+        self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
         rospy.loginfo("Arrived at free space")
-
 
     def move_to(self, desired_state, desired_dir):
         # calculate amount to move in x, y, or radial directions
