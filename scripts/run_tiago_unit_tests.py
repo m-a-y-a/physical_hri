@@ -206,13 +206,14 @@ class run_tiago:
             # self.mode = 0
             # self.mode_saved = False
 
+            # works:
 
-            rospy.loginfo("offering right")
-            # self.play_motion('offer_right', block=True)
-            self.play_motion('offer_right')
-            
-            rospy.loginfo("moving torso")
-            self.move_torso2(self.torso_height_dropoff_table)
+            # rospy.loginfo("offering right")
+            # # self.play_motion('offer_right', block=True)
+            # self.play_motion('offer_right')
+
+            # rospy.loginfo("moving torso")
+            # self.move_torso2(self.torso_height_dropoff_table)
 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             rospy.loginfo("moving arm right extend")
