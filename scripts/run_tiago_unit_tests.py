@@ -190,9 +190,20 @@ class run_tiago:
 
             self.rate.sleep()
         elif self.mode == 5:
-            
-            x_diff, y_diff = self.get_aruco_distance(msg)
-            rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
+
+            # x_diff, y_diff = self.get_aruco_distance(msg)
+            # rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
+            rospy.loginfo("offering right")
+            self.play_motion('offer_right', block=True)
+            arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+            rospy.loginfo("moving arm right (full extension)")
+            self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
+
+            #or maybe 
+            rospy.loginfo("moving arm right diff publisher")
+            self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
+            self.mode = 0
+            self.mode_saved = False
 
         elif self.mode == 6:
             rospy.loginfo("trying new move torso function (pickup table height)")
@@ -200,18 +211,18 @@ class run_tiago:
 
             rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
             self.move_torso2(self.torso_height_dropoff_table)
+            self.mode = 0
+            self.mode_saved = False
 
         elif self.mode == 7:
             rospy.loginfo("Mode is %s" % str(self.mode))
 
-            # rate should be higher moves really patchy
             # Enter the scene
             rospy.loginfo("Entering the Scene")
 
             # center of the room
             self.start_to_free_space()
             # self.say("hello i am tiago")                #say out loud
-
 
             # For every object on the inventory table:
             n = 2 # (2 times to test)
