@@ -299,6 +299,8 @@ class run_tiago:
         # Calculating variables to reach goal
         if direction == 0:
             time = math.ceil(abs(distance)/self.linear_speed)
+            if time == 0:
+                time = 1.0
             pub_msg.linear.x = distance/time #slightly vary linear speed #error here after arrive at free space
         if direction == 1 :
             time = math.ceil(abs(distance)/self.linear_speed)
