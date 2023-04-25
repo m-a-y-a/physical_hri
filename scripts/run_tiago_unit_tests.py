@@ -214,6 +214,8 @@ class run_tiago:
 
             # rospy.loginfo("moving torso")
             # self.move_torso2(self.torso_height_dropoff_table)
+            rospy.loginfo("move_arm")
+            self.move_arm(self.right_arm_full_extension)
 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             rospy.loginfo("moving arm right extend")
