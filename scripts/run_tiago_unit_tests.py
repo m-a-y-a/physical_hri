@@ -206,11 +206,18 @@ class run_tiago:
             self.mode_saved = False
 
         elif self.mode == 6:
-            rospy.loginfo("trying new move torso function (pickup table height)")
-            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
+            try:
+                rospy.loginfo("trying new move torso function (pickup table height)")
+                self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
+            except Exception as e:
+                print(e)
 
-            rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
-            self.move_torso2(self.torso_height_dropoff_table)
+            try:
+                rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
+                self.move_torso2(self.torso_height_dropoff_table)
+            except Exception as e:
+                print(e)
+                
             self.mode = 0
             self.mode_saved = False
 
@@ -341,7 +348,7 @@ class run_tiago:
         # Calculating variables to reach goal
         if direction == 0:
             time = math.ceil(abs(distance)/self.linear_speed)
-            pub_msg.linear.x = distance/time #slightly vary linear speed
+            pub_msg.linear.x = distance/time #slightly vary linear speed #error here after arrive at free space
         if direction == 1 :
             time = math.ceil(abs(distance)/self.linear_speed)
             pub_msg.linear.y = distance/time #slightly vary linear speed
