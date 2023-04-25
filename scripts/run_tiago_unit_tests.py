@@ -210,11 +210,15 @@ class run_tiago:
             rospy.loginfo("offering right")
             # self.play_motion('offer_right', block=True)
             self.play_motion('offer_right')
-            # self.move_torso2(self.torso_height_dropoff_table)
+            
+            rospy.loginfo("moving torso")
+            self.move_torso2(self.torso_height_dropoff_table)
 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            rospy.loginfo("moving arm right diff publisher")
+            rospy.loginfo("moving arm right extend")
             self.move_joint(self.arm_right, arm_joints, self.right_arm_full_extension)
+            rospy.loginfo("moving arm right shorter")
+            self.move_joint(self.arm_right, arm_joints, self.right_arm_front_items)
             self.mode = 0
             self.mode_saved = False
 
@@ -276,7 +280,7 @@ class run_tiago:
 
         arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
         rospy.loginfo("moving arm right diff publisher")
-        self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
+        self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension) # doesnt error but doesnt moove any more
         self.mode = 0
         self.mode_saved = False
 
