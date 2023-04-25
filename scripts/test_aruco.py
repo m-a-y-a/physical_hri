@@ -53,8 +53,8 @@ def get_aruco_distance():
                     camera_info_width = 640
                     camera_info_height = 480
                     D = [0.011434452409443142, -0.06828667970669487, -0.0019653945487388834, 0.0049774108597738205, 0.0]
-                    dist_coeffs = D
-                    K = [520.9903919408287, 0.0, 339.3749038438434, 0.0, 520.3005424418425, 238.66492050564054, 0.0, 0.0, 1.0]
+                    dist_coeffs = np.array(D)
+                    K = np.array([520.9903919408287, 0.0, 339.3749038438434, 0.0, 520.3005424418425, 238.66492050564054, 0.0, 0.0, 1.0])
                     # Convert the center point to a normalized ray in camera coordinates
                     cx = camera_info_width / 2.0
                     cy = camera_info_height / 2.0
@@ -63,7 +63,7 @@ def get_aruco_distance():
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
-                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    x_c, y_c = cv2.undistortPoints(np.array([x_c, y_c], dtype=np.float32), K, dist_coeffs)[0]
                     
                     # Convert the point to 3D coordinates in the camera frame
                     table_p_c = np.array([x_c, y_c, z_c])
