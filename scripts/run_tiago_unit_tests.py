@@ -89,7 +89,8 @@ class run_tiago:
             self.move_to([self.free_space[0], self.free_space[1], 0], 1)        # move in robot y
             self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
             rospy.loginfo("Arrived at free space")
-            self.say("hello i am tiago")                #say out loud
+            # self.say("hello i am tiago")                #say out loud
+
 
             # For every object on the inventory table:
             n = 2 # (2 times to test)
@@ -191,6 +192,82 @@ class run_tiago:
         elif self.mode == 5:
             x_diff, y_diff = self.get_aruco_distance(msg)
             rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
+
+        elif self.mode == 6:
+            rospy.loginfo("trying new move torso function")
+            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
+
+            rospy.loginfo("trying move torso func that works on gazebo")
+            self.move_torso2(self.torso_height_table)
+
+        elif self.mode == 7:
+            rospy.loginfo("Mode is %s" % str(self.mode))
+
+            # rate should be higher moves really patchy
+            # Enter the scene
+            rospy.loginfo("Entering the Scene")
+
+            # center of the room
+            self.start_to_free_space()
+            self.say("hello i am tiago")                #say out loud
+
+
+            # For every object on the inventory table:
+            n = 2 # (2 times to test)
+            for i in range(1, n+1):
+                # Request item
+                rospy.loginfo("Request item")
+                self.say("what can i get you")               #say out loud
+
+                # Move to table
+                self.free_space_to_table()
+
+                # Perform Pick and Place
+
+                # Bring item to user
+                self.free_space_to_table()
+
+                # reset: move back to center
+                self.dropoff_to_free_space()
+            
+            # End sequence
+            rospy.loginfo("End of interaction")
+
+            self.mode = 0
+            self.mode_saved = False
+
+
+    def start_to_free_space(self):
+        # center of the room
+        self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
+        self.move_to([self.free_space[0], self.free_space[1], 0], 1)        # move in robot y
+        self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
+        rospy.loginfo("Arrived at free space")
+
+    def free_space_to_table(self):
+        # Move to table
+        self.move_to([self.free_space[0], self.free_space[1], 0], 2)  # turn to tv
+        self.move_to([self.table_pos[0], self.free_space[1], 0], 0) # move forward
+        self.move_to([self.table_pos[0], self.free_space[1], -90], 2) # turn to face table
+        self.move_to([self.table_pos[0], self.table_pos[1], -90], 0) # move to in front of table
+        rospy.loginfo("Arrived at Table")
+
+    def free_space_to_table(self):
+        self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
+        self.move_to([self.table_pos[0], self.free_space[1], 90], 2) # turn to front of room
+        self.move_to([self.table_pos[0], self.drop_off_pos[1], 90], 0) # move to y = 0.25
+        self.move_to([self.table_pos[0], self.drop_off_pos[1], 0], 2) # turn to drop off table
+        self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 0], 0) # move to x = 2.15 in front of drop off table
+        rospy.loginfo("Arrived at drop off")
+
+
+    def dropoff_to_free_space(self):
+         # reset: move back to center
+        self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
+        self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
+        self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
+        self.move_to([self.free_space[0], self.free_space[1], 60], 2) # face user
+        rospy.loginfo("Arrived at free space")
 
 
     def move_to(self, desired_state, desired_dir):
@@ -526,7 +603,7 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago(mode=2)
+    tiago = run_tiago(mode=7)
     rospy.loginfo("Node and server initialized")
     tiago.run()
 
