@@ -670,7 +670,7 @@ def main():
     rospy.loginfo("Initialize node and server")
 
     # tiago = run_tiago(mode=5)
-    self.test_major_moves()
+    # self.test_major_moves()
     self.test_arm_movement()
 
     rospy.loginfo("Node and server initialized")
