@@ -87,16 +87,16 @@ class run_tiago:
             # center of the room
             self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
             self.move_to([self.free_space[0], self.free_space[1], 0], 1)        # move in robot y
-            self.move_to([self.free_space[0], self.free_space[1], 68], 2)       # turn to user
+            self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
             rospy.loginfo("Arrived at free space")
-            #self.say("Start of interaction")                #say out loud
+            self.say("hello i am tiago")                #say out loud
 
             # For every object on the inventory table:
             n = 2 # (2 times to test)
             for i in range(1, n+1):
                 # Request item
                 rospy.loginfo("Request item")
-                #self.say("Ask user for item")               #say out loud
+                self.say("what can i get you")               #say out loud
 
                 # Move to table
                 self.move_to([self.free_space[0], self.free_space[1], 0], 2)  # turn to tv
@@ -122,7 +122,7 @@ class run_tiago:
                 self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
                 self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
                 self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
-                self.move_to([self.free_space[0], self.free_space[1], 68], 2) # face user
+                self.move_to([self.free_space[0], self.free_space[1], 60], 2) # face user
                 rospy.loginfo("Arrived at free space")
 
 
