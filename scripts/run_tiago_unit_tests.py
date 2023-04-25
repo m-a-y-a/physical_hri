@@ -481,9 +481,10 @@ class run_tiago:
         elif (cmd == "thank you"):
             self.say("you are welcome")
 
-    def play_motion(self, motion_name, block=True):
+    def play_motion(self, motion_name, block=False):
         g = PlayMotionGoal()
         g.motion_name = motion_name
+        self.ac.wait_for_server()
 
         if block:
             self.ac.send_goal_and_wait(g)
