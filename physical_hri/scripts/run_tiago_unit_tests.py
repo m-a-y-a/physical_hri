@@ -138,7 +138,8 @@ class run_tiago:
             rospy.loginfo("Mode is %s" % str(self.mode))
 
             # Move torso up to inventory table
-            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
+            self.move_torso2(self.torso_height_table)
+            #self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
             # self.move_torso(self.torso_height_table)
 
             # Lift arm
@@ -375,6 +376,22 @@ class run_tiago:
         # goal.trajectory.points.append(jtp)
         # self.torso.send_goal(goal)
         # self.torso.wait_for_result()
+    
+    def move_torso2(self, height):
+        client = SimpleActionClient('torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
+        client.wait_for_server(timeout=rospy.Duration(5))
+
+        jtp = JointTrajectoryPoint()
+        jtp.time_from_start = rospy.Duration(2)
+        jtp.positions.append(height)
+
+        goal = FollowJointTrajectoryGoal()
+        goal.trajectory.joint_names.append('torso_lift_joint')
+        goal.trajectory.header.stamp = rospy.Time.now()
+        goal.trajectory.points.append(jtp)
+
+        # Callbacks are not handled right now
+        client.send_goal(goal)
      
     def move_arm(self, pos):
         goal = FollowJointTrajectoryGoal()
