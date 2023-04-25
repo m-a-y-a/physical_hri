@@ -214,7 +214,7 @@ class run_tiago:
 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             rospy.loginfo("moving arm right diff publisher")
-            self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
+            self.move_joint(self.arm_right, arm_joints, self.right_arm_full_extension)
             self.mode = 0
             self.mode_saved = False
 
