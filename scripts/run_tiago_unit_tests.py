@@ -56,7 +56,7 @@ class run_tiago:
         self.current_state = np.array([0, 0, 0])
         # total (2.5, 3.5) to the table
         # self.interact_pos = [1.925, 1.75] # inwards 1.925 m and upwards 1.75
-        self.free_space = [1.25, 1.75] # center of the "room"
+        self.free_space = [1.25, 1.5] # center of the "room"
         self.table_pos =  [1.925, 2] # table to pick up objects
         self.drop_off_pos = [2.0, 0.3] # drop off table
 
@@ -255,12 +255,59 @@ class run_tiago:
             self.mode = 0
             self.mode_saved = False
 
+    def test_arm_movement(self):
+        rospy.loginfo("offering right")
+        # self.play_motion('offer_right', block=True)
+        self.play_motion('offer_right')
+        # self.move_torso2(self.torso_height_dropoff_table)
+
+        arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+        rospy.loginfo("moving arm right diff publisher")
+        self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
+        self.mode = 0
+        self.mode_saved = False
+
+
+    def test_major_moves(self):
+        rospy.loginfo("Mode is %s" % str(self.mode))
+
+        # Enter the scene
+        rospy.loginfo("Entering the Scene")
+
+        # center of the room
+        self.start_to_free_space()
+        # self.say("hello i am tiago")                #say out loud
+
+        # For every object on the inventory table:
+        n = 2 # (2 times to test)
+        for i in range(1, n+1):
+            # Request item
+            rospy.loginfo("Request item")
+            # self.say("what can i get you")               #say out loud
+
+            # Move to table
+            self.free_space_to_table()
+
+            # Perform Pick and Place
+
+            # Bring item to user
+            self.free_space_to_table()
+
+            # reset: move back to center
+            self.dropoff_to_free_space()
+        
+        # End sequence
+        rospy.loginfo("End of interaction")
+
+        self.mode = 0
+        self.mode_saved = False
+
 
     def start_to_free_space(self):
         # center of the room
         self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
         self.move_to([self.free_space[0], self.free_space[1], 0], 1)        # move in robot y
-        self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
+        self.move_to([self.free_space[0], self.free_space[1], 30], 2)       # turn to user
         rospy.loginfo("Arrived at free space")
 
     def free_space_to_table(self):
@@ -285,7 +332,7 @@ class run_tiago:
         self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
         self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
         self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
-        self.move_to([self.free_space[0], self.free_space[1], 60], 2) # face user
+        self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
         rospy.loginfo("Arrived at free space")
 
 
@@ -622,7 +669,10 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago(mode=5)
+    # tiago = run_tiago(mode=5)
+    self.test_major_moves()
+    self.test_arm_movement()
+
     rospy.loginfo("Node and server initialized")
     tiago.run()
 
