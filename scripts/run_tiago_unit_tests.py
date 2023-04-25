@@ -190,15 +190,16 @@ class run_tiago:
 
             self.rate.sleep()
         elif self.mode == 5:
+            
             x_diff, y_diff = self.get_aruco_distance(msg)
             rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
 
         elif self.mode == 6:
-            rospy.loginfo("trying new move torso function")
+            rospy.loginfo("trying new move torso function (pickup table height)")
             self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
 
-            rospy.loginfo("trying move torso func that works on gazebo")
-            self.move_torso2(self.torso_height_table)
+            rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
+            self.move_torso2(self.torso_height_dropoff_table)
 
         elif self.mode == 7:
             rospy.loginfo("Mode is %s" % str(self.mode))
@@ -209,7 +210,7 @@ class run_tiago:
 
             # center of the room
             self.start_to_free_space()
-            self.say("hello i am tiago")                #say out loud
+            # self.say("hello i am tiago")                #say out loud
 
 
             # For every object on the inventory table:
@@ -217,7 +218,7 @@ class run_tiago:
             for i in range(1, n+1):
                 # Request item
                 rospy.loginfo("Request item")
-                self.say("what can i get you")               #say out loud
+                # self.say("what can i get you")               #say out loud
 
                 # Move to table
                 self.free_space_to_table()
