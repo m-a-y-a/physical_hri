@@ -196,8 +196,8 @@ class run_tiago:
             rospy.loginfo("offering right")
             self.play_motion('offer_right', block=True)
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            rospy.loginfo("moving arm right (full extension)")
-            self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
+            # rospy.loginfo("moving arm right (full extension)")
+            # self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
 
             #or maybe 
             rospy.loginfo("moving arm right diff publisher")
