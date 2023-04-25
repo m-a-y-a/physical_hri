@@ -43,6 +43,7 @@ class run_tiago:
         rospy.loginfo("Connecting to /play_motion...")
 
         self.arm = SimpleActionClient('/arm_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
+        self.arm_right = SimpleActionClient('/arm_right_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # class variables
@@ -155,7 +156,7 @@ class run_tiago:
             self.move_head_to_position(self.head_rot_table)
             # Move arm 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
+            self.move_joint(self.arm_right, arm_joints, self.right_arm_full_extension)
             # self.move_arm(self.right_arm_full_extension)
             # Grasp
             self.grasp()
