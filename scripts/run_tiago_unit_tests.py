@@ -12,6 +12,7 @@ import numpy as np
 from actionlib import SimpleActionClient
 from pal_interaction_msgs.msg import TtsAction, TtsGoal
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
+from pal_common_msgs.msg import DisableGoal, DisableAction
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 from cv_bridge import CvBridge
@@ -322,7 +323,7 @@ class run_tiago:
 
     def move_gripper(self, pos):
         #gripper is -0.09 to close and 0.09 to open
-        move_joint(["parallel_gripper_joint"], [pos])
+        self.move_joint(["parallel_gripper_joint"], [pos])
         # joint_msg = JointTrajectory()
         # joint_msg.joint_names = ["parallel_gripper_joint"]
 
@@ -435,12 +436,19 @@ class run_tiago:
     #     self.arm.wait_for_result()
 
     def keep_head_still(self):
+        '''
         node = '/pal_head_manager' 
         is_running = rosnode.rosnode_ping(node, max_count = 10)
         # print("Is the node " + node_name + " running?" + str(is_running))
         if is_running:
         # if the node is running, shut it down
             rosnode.kill_nodes([node_name])
+        '''
+        head_mgr_client = SimpleActionClient('/pal_head_manager/disable', DisableAction)
+        action = DisableGoal()
+        rospy.loginfo("disabling head manager")
+        action.duration = 0.0
+        head_mgr_client.send_goal(action)
 
 
     def move_head_to_position(self, pos):
@@ -482,10 +490,10 @@ class run_tiago:
         self.camera_info = data.camera_info
         
         # Construct the camera matrix from intrinsic parameters
-        self.K = np.array(camera_info.K).reshape(3, 3)
+        self.K = np.array(self.camera_info.K).reshape(3, 3)
         
         # Construct the distortion coefficients
-        self.dist_coeffs = np.array(camera_info.D)
+        self.dist_coeffs = np.array(self.camera_info.D)
         
     def get_aruco_distance(self, item):
         # Define the ArUco dictionary and parameters
@@ -510,14 +518,14 @@ class run_tiago:
                     marker_center = np.mean(marker_corners, axis=0)
                     
                     # Convert the center point to a normalized ray in camera coordinates
-                    cx = camera_info.width / 2.0
-                    cy = camera_info.height / 2.0
-                    fx = K[0, 0]
-                    fy = K[1, 1]
+                    cx = self.camera_info.width / 2.0
+                    cy = self.camera_info.height / 2.0
+                    fx = self.K[0, 0]
+                    fy = self.K[1, 1]
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
-                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), self.K, self.dist_coeffs)[0]
                     
                     # Convert the point to 3D coordinates in the camera frame
                     table_p_c = np.array([x_c, y_c, z_c])
@@ -531,14 +539,14 @@ class run_tiago:
                     marker_center = np.mean(marker_corners, axis=0)
                     
                     # Convert the center point to a normalized ray in camera coordinates
-                    cx = camera_info.width / 2.0
-                    cy = camera_info.height / 2.0
-                    fx = K[0, 0]
-                    fy = K[1, 1]
+                    cx = self.camera_info.width / 2.0
+                    cy = self.camera_info.height / 2.0
+                    fx = self.K[0, 0]
+                    fy = self.K[1, 1]
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
-                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), self.K, self.dist_coeffs)[0]
                     
                     # Convert the point to 3D coordinates in the camera frame
                     p_c = np.array([x_c, y_c, z_c])
