@@ -48,6 +48,7 @@ class run_tiago:
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # class variables
+        self.aruco_dictionary = {"water bottle": 8, "medicine bottle": 12, "oats": 11, "mixed nuts": 10, "CHECK THIS ONE": 9}
         self.camera_info = None
         self.dist_coeffs = None
         self.K = None
