@@ -77,72 +77,11 @@ class run_tiago:
         # while not rospy.is_shutdown():
         if self.mode == 0: # do nothing
             pass
-        elif self.mode == 1: # major moves test
-            
-            rospy.loginfo("Mode is %s" % str(self.mode))
-
-            # rate should be higher moves really patchy
-            # Enter the scene
-            rospy.loginfo("Entering the Scene")
-
-            # center of the room
-            self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
-            self.move_to([self.free_space[0], self.free_space[1], 0], 1)        # move in robot y
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
-            rospy.loginfo("Arrived at free space")
-            # self.say("hello i am tiago")                #say out loud
-
-
-            # For every object on the inventory table:
-            n = 2 # (2 times to test)
-            for i in range(1, n+1):
-                # Request item
-                rospy.loginfo("Request item")
-                self.say("what can i get you")               #say out loud
-
-                # Move to table
-                self.move_to([self.free_space[0], self.free_space[1], 0], 2)  # turn to tv
-                self.move_to([self.table_pos[0], self.free_space[1], 0], 0) # move forward
-                self.move_to([self.table_pos[0], self.free_space[1], -90], 2) # turn to face table
-                self.move_to([self.table_pos[0], self.table_pos[1], -90], 0) # move to in front of table
-                rospy.loginfo("Arrived at Table")
-                #self.say("Pick up item")                    #say out loud
-
-                # Perform Pick and Place
-
-                # Bring item to user
-                self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
-                self.move_to([self.table_pos[0], self.free_space[1], 90], 2) # turn to front of room
-                self.move_to([self.table_pos[0], self.drop_off_pos[1], 90], 0) # move to y = 0.25
-                self.move_to([self.table_pos[0], self.drop_off_pos[1], 0], 2) # turn to drop off table
-                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 0], 0) # move to x = 2.15 in front of drop off table
-                # self.move_to([self.interact_pos[0], self.interact_pos[1], 30], 2)   # turn
-                rospy.loginfo("Arrived at drop off")
-                #self.say("Hand item to user")               #say out loud
-
-                # reset: move back to center
-                self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
-                self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
-                self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
-                self.move_to([self.free_space[0], self.free_space[1], 60], 2) # face user
-                rospy.loginfo("Arrived at free space")
-
-
-            
-            # End sequence
-            rospy.loginfo("End of interaction")
-            #self.say("End of interaction")                  #say out loud
-
-            self.mode = 0
-            self.mode_saved = False
-
-        elif self.mode == 2: #gripper and arm test
+        elif self.mode == 1: #gripper and arm test
             rospy.loginfo("Mode is %s" % str(self.mode))
 
             # Move torso up to inventory table
             self.move_torso2(self.torso_height_table)
-            #self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
-            # self.move_torso(self.torso_height_table)
 
             # Lift arm
             rospy.loginfo("Lifting arm")
@@ -157,14 +96,13 @@ class run_tiago:
             # Move arm 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             self.move_joint(self.arm_right, arm_joints, self.right_arm_full_extension)
-            # self.move_arm(self.right_arm_full_extension)
+
             # Grasp
             self.grasp()
             # ------------------------------------------------
 
             # Move torso down to little table
-            # self.move_torso(self.torso_height_dropoff_table)
-            self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_dropoff_table, [0.1])
+            self.move_torso2(self.torso_height_dropoff_table)
 
             self.mode = 0
             self.mode_saved = False
@@ -180,42 +118,17 @@ class run_tiago:
             self.mode = 0
             self.mode_saved = False
 
-        elif self.mode == 4: #wave test
-            rospy.loginfo("Mode is %s" % str(self.mode))
-
-            self.play_motion('wave', block=True)
-
-            self.mode = 0
-            self.mode_saved = False
-
-
-            self.rate.sleep()
         elif self.mode == 5:
 
-            # # x_diff, y_diff = self.get_aruco_distance(msg)
-            # # rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
-            # rospy.loginfo("offering right")
-            # self.play_motion('offer_right', block=True)
-            # arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            # # rospy.loginfo("moving arm right (full extension)")
-            # # self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
+            # -------------- works: -------------------
 
-            # #or maybe 
-            # rospy.loginfo("moving arm right diff publisher")
-            # self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
-            # self.mode = 0
-            # self.mode_saved = False
+            rospy.loginfo("offering right")
+            self.play_motion('offer_right')
 
-            # works:
+            rospy.loginfo("moving torso")
+            self.move_torso2(self.torso_height_dropoff_table)
 
-            # rospy.loginfo("offering right")
-            # # self.play_motion('offer_right', block=True)
-            # self.play_motion('offer_right')
-
-            # rospy.loginfo("moving torso")
-            # self.move_torso2(self.torso_height_dropoff_table)
-            rospy.loginfo("move_arm")
-            self.move_arm(self.right_arm_full_extension)
+            # -------------- end of works -------------------
 
             arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             rospy.loginfo("moving arm right extend")
@@ -226,60 +139,12 @@ class run_tiago:
             self.mode_saved = False
 
         elif self.mode == 6:
-            # try:
-            #     rospy.loginfo("trying new move torso function (pickup table height)")
-            #     self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
-            # except Exception as e:
-            #     print(e)
-
-            try:
-                rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
-                self.move_torso2(self.torso_height_dropoff_table)
-            except Exception as e:
-                print(e)
-
-            self.mode = 0
-            self.mode_saved = False
-
-        elif self.mode == 7:
             rospy.loginfo("Mode is %s" % str(self.mode))
-
-            # Enter the scene
-            rospy.loginfo("Entering the Scene")
-
-            # center of the room
-            self.start_to_free_space()
-            # self.say("hello i am tiago")                #say out loud
-
-            # For every object on the inventory table:
-            n = 2 # (2 times to test)
-            for i in range(1, n+1):
-                # Request item
-                rospy.loginfo("Request item")
-                # self.say("what can i get you")               #say out loud
-
-                # Move to table
-                self.free_space_to_table()
-
-                # Perform Pick and Place
-
-                # Bring item to user
-                self.free_space_to_table()
-
-                # reset: move back to center
-                self.dropoff_to_free_space()
-            
-            # End sequence
-            rospy.loginfo("End of interaction")
-
-            self.mode = 0
-            self.mode_saved = False
+            self.test_major_moves()
 
     def test_arm_movement(self):
         rospy.loginfo("offering right")
-        # self.play_motion('offer_right', block=True)
         self.play_motion('offer_right')
-        # self.move_torso2(self.torso_height_dropoff_table)
 
         arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
         rospy.loginfo("moving arm right diff publisher")
@@ -289,8 +154,6 @@ class run_tiago:
 
 
     def test_major_moves(self):
-        rospy.loginfo("Mode is %s" % str(self.mode))
-
         # Enter the scene
         rospy.loginfo("Entering the Scene")
 
@@ -321,6 +184,13 @@ class run_tiago:
 
         self.mode = 0
         self.mode_saved = False
+
+    def get_ready_to_grab_object(self):
+        rospy.loginfo("offering right")
+        self.play_motion('offer_right')
+
+        rospy.loginfo("moving torso")
+        self.move_torso2(self.torso_height_dropoff_table)
 
 
     def start_to_free_space(self):
@@ -514,32 +384,11 @@ class run_tiago:
         goal_pos = FollowJointTrajectoryGoal()
         goal_pos.trajectory = trajectory
         goal_pos.goal_time_tolerance = rospy.Duration(0)
+        joint.wait_for_server(timeout=rospy.Duration(5))
+        
         joint.send_goal(goal_pos)
         joint.wait_for_result()
 
-    def move_torso(self, height):
-        # goal = FollowJointTrajectoryGoal()
-        goal = JointTrajectory()
-        # call joint trajectroy^
-        goal.joint_names = ['torso_lift_joint']
-        jtp = JointTrajectoryPoint()
-
-        goal.points.append(jtp)
-        goal.points[0].positions = [height]
-        goal.points[0].velocities = [0.1]
-        goal.points[0].time_from_start = rospy.Duration(2.0)
-
-        joint_gol_pos = FollowJointTrajectoryGoal()
-        joint_gol_pos.trajectory = goal 
-        joint_gol_pos.goal_time_tolerance = rospy.Duration(0)
-        joint.send_goal(joint_gol_pos)
-        joint.wait_for_result()
-        # jtp.positions = [height]
-        # jtp.velocities = [0.1]
-        # jtp.time_from_start = rospy.Duration(2.0)
-        # goal.trajectory.points.append(jtp)
-        # self.torso.send_goal(goal)
-        # self.torso.wait_for_result()
     
     def move_torso2(self, height):
         client = SimpleActionClient('torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
@@ -557,16 +406,17 @@ class run_tiago:
         # Callbacks are not handled right now
         client.send_goal(goal)
      
-    def move_arm(self, pos):
-        goal = FollowJointTrajectoryGoal()
-        goal.trajectory.joint_names = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-        jtp = JointTrajectoryPoint()
-        jtp.positions = [pos[0], pos[1], pos[2], pos[3], pos[4], pos[5], pos[6]]
-        jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-        jtp.time_from_start = rospy.Duration(2.0)
-        goal.trajectory.points.append(jtp)
-        self.arm.send_goal(goal) #[server, coordinates] [torso, torso lift joint, [0.25]?]
-        self.arm.wait_for_result()
+    # def move_arm(self, pos):
+    #     goal = FollowJointTrajectoryGoal()
+    #     joint.wait_for_server(timeout=rospy.Duration(5))
+    #     goal.trajectory.joint_names = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+    #     jtp = JointTrajectoryPoint()
+    #     jtp.positions = [pos[0], pos[1], pos[2], pos[3], pos[4], pos[5], pos[6]]
+    #     jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    #     jtp.time_from_start = rospy.Duration(2.0)
+    #     goal.trajectory.points.append(jtp)
+    #     self.arm.send_goal(goal) #[server, coordinates] [torso, torso lift joint, [0.25]?]
+    #     self.arm.wait_for_result()
 
     def keep_head_still(self):
         node = '/pal_head_manager' 
@@ -601,6 +451,7 @@ class run_tiago:
         traj_msg.points.append(point)
 
         # Publish the trajectory message
+        pub.wait_for_server(timeout=rospy.Duration(5))
         pub.publish(traj_msg)
 
         # disable head movement
