@@ -217,7 +217,7 @@ class run_tiago:
                 self.move_torso2(self.torso_height_dropoff_table)
             except Exception as e:
                 print(e)
-                
+
             self.mode = 0
             self.mode_saved = False
 
@@ -622,7 +622,7 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago(mode=6)
+    tiago = run_tiago(mode=5)
     rospy.loginfo("Node and server initialized")
     tiago.run()
 
