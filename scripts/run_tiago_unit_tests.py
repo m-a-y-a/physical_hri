@@ -206,11 +206,11 @@ class run_tiago:
             self.mode_saved = False
 
         elif self.mode == 6:
-            try:
-                rospy.loginfo("trying new move torso function (pickup table height)")
-                self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
-            except Exception as e:
-                print(e)
+            # try:
+            #     rospy.loginfo("trying new move torso function (pickup table height)")
+            #     self.move_joint(self.torso, ['torso_lift_joint'], self.torso_height_table, [0.1])
+            # except Exception as e:
+            #     print(e)
 
             try:
                 rospy.loginfo("trying move torso func that works on gazebo (dropoff table height")
