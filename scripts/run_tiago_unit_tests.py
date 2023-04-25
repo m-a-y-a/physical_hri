@@ -191,15 +191,27 @@ class run_tiago:
             self.rate.sleep()
         elif self.mode == 5:
 
-            # x_diff, y_diff = self.get_aruco_distance(msg)
-            # rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
-            rospy.loginfo("offering right")
-            self.play_motion('offer_right', block=True)
-            arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
-            # rospy.loginfo("moving arm right (full extension)")
-            # self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
+            # # x_diff, y_diff = self.get_aruco_distance(msg)
+            # # rospy.loginfo("Distance to aruco tag is x_diff: {0}, y_diff: {1}".format(x_diff, y_diff))
+            # rospy.loginfo("offering right")
+            # self.play_motion('offer_right', block=True)
+            # arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+            # # rospy.loginfo("moving arm right (full extension)")
+            # # self.move_joint(self.arm, arm_joints, self.right_arm_full_extension)
 
-            #or maybe 
+            # #or maybe 
+            # rospy.loginfo("moving arm right diff publisher")
+            # self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
+            # self.mode = 0
+            # self.mode_saved = False
+
+
+            rospy.loginfo("offering right")
+            # self.play_motion('offer_right', block=True)
+            self.play_motion('offer_right')
+            # self.move_torso2(self.torso_height_dropoff_table)
+
+            arm_joints = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
             rospy.loginfo("moving arm right diff publisher")
             self.move_joint(self.arm_pub, arm_joints, self.right_arm_full_extension)
             self.mode = 0
@@ -669,9 +681,9 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    # tiago = run_tiago(mode=5)
+    tiago = run_tiago(mode=5)
     # self.test_major_moves()
-    self.test_arm_movement()
+    # self.test_arm_movement()
 
     rospy.loginfo("Node and server initialized")
     tiago.run()
