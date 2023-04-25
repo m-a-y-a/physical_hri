@@ -130,7 +130,7 @@ class run_tiago:
             # client.wait_for_result()
 
             rospy.loginfo("moving torso")
-            self.move_torso2(self.torso_height_dropoff_table)
+            self.move_torso2(self.torso_height_table)
 
             # -------------- end of works -------------------
 
@@ -391,20 +391,21 @@ class run_tiago:
 
 
     def move_joint(self, joint, joint_names, joint_positions, joint_velocities=None):
+        joint.wait_for_server()
         trajectory = JointTrajectory()
         trajectory.joint_names = joint_names
 
         jtp = JointTrajectoryPoint()
         trajectory.points.append(jtp)
         trajectory.points[0].positions = joint_positions
-        if joint_velocities is not None:
-            trajectory.points[0].velocities = joint_velocities
+        # if joint_velocities is not None:
+        #     trajectory.points[0].velocities = joint_velocities
         trajectory.points[0].time_from_start = rospy.Duration(2.0)
 
         goal_pos = FollowJointTrajectoryGoal()
         goal_pos.trajectory = trajectory
         goal_pos.goal_time_tolerance = rospy.Duration(0)
-        joint.wait_for_server()
+        
         
         joint.send_goal(goal_pos)
         joint.wait_for_result()
