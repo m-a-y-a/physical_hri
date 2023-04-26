@@ -354,14 +354,10 @@ class run_tiago:
 
             with sr.Microphone() as src:
                 self.listener.adjust_for_ambient_noise(src)
-                # self.listener.pause_threshold=1.2
-                self.listener.energy_threshold = 1932
-                self.listener.dynamic_energy_threshold = True
                 
                 rospy.loginfo("trying to listen")
-                # audio = self.listener.listen(src, timeout=10)
                 audio = self.listener.listen(src)
-                # audio = self.listener.record(source=mic, duration=10)
+                
                 rospy.loginfo("trying google recognition")
                 cmd = self.listener.recognize_google(audio, language = "en-EN")
                 cmd = cmd.lower()        
@@ -379,6 +375,16 @@ class run_tiago:
             self.say("")
         elif (cmd == "thank you"):
             self.say("you are welcome")
+        elif "water" in list_cmd:
+            self.say("getting the water bottle")
+        elif "nuts" in list_cmd:
+            self.say("getting the mixed nuts")
+        elif "medicine" in list_cmd or "pill" in list_cmd:
+            self.say("getting the pill bottle")
+        elif "oats" in list_cmd:
+            self.say("getting the oats")
+        elif "" in list_cmd:
+            self.say("getting the ________") # should change this one, i just dont know what the last object is 
 
     def play_motion(self, motion_name, block=False):
         g = PlayMotionGoal()
