@@ -12,6 +12,7 @@ import numpy as np
 from actionlib import SimpleActionClient
 from pal_interaction_msgs.msg import TtsAction, TtsGoal
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
+from pal_common_msgs.msg import DisableGoal, DisableAction
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 from cv_bridge import CvBridge
@@ -47,6 +48,7 @@ class run_tiago:
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # class variables
+        self.aruco_dictionary = {"water bottle": 8, "pill bottle": 12, "oats": 11, "mixed nuts": 10, "vitamins": 9}
         self.camera_info = None
         self.dist_coeffs = None
         self.K = None
@@ -59,7 +61,8 @@ class run_tiago:
         # self.interact_pos = [1.925, 1.75] # inwards 1.925 m and upwards 1.75
         self.free_space = [1.25, 1.5] # center of the "room"
         self.table_pos =  [1.925, 2] # table to pick up objects
-        self.drop_off_pos = [2.0, 0.3] # drop off table
+        #self.drop_off_pos = [2.0, 0.3] # drop off table
+        self.drop_off_pos = [2.00, 0.90]
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
         self.right_arm_front_items = [1.46, 1.02, 0.09, 1.32, -1.48, -0.34, 0.00]
@@ -124,9 +127,10 @@ class run_tiago:
 
             rospy.loginfo("offering right")
             self.play_motion('offer_right')
+            # client.wait_for_result()
 
             rospy.loginfo("moving torso")
-            self.move_torso2(self.torso_height_dropoff_table)
+            self.move_torso2(self.torso_height_table)
 
             # -------------- end of works -------------------
 
@@ -174,7 +178,7 @@ class run_tiago:
             # Perform Pick and Place
 
             # Bring item to user
-            self.free_space_to_table()
+            self.table_to_dropoff()
 
             # reset: move back to center
             self.dropoff_to_free_space()
@@ -207,24 +211,39 @@ class run_tiago:
         self.move_to([self.table_pos[0], self.free_space[1], -90], 2) # turn to face table
         self.move_to([self.table_pos[0], self.table_pos[1], -90], 0) # move to in front of table
         rospy.loginfo("Arrived at Table")
-
-    def free_space_to_table(self):
+        
+    def table_to_dropoff(self):
+        '''
         self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
         self.move_to([self.table_pos[0], self.free_space[1], 90], 2) # turn to front of room
         self.move_to([self.table_pos[0], self.drop_off_pos[1], 90], 0) # move to y = 0.25
         self.move_to([self.table_pos[0], self.drop_off_pos[1], 0], 2) # turn to drop off table
         self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 0], 0) # move to x = 2.15 in front of drop off table
+        '''
+        # doesnt get close enough to the table
+        self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
+        self.move_to([self.table_pos[0], self.free_space[1], 0], 2) # turn 
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 0], 0) # move forward
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 2) # turn
+        self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0) # move forward
         rospy.loginfo("Arrived at drop off")
 
 
     def dropoff_to_free_space(self):
          # reset: move back to center
+        '''
         self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0) # move backwards in x direction to center
         self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2) # turn to face table
         self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
         self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
-        rospy.loginfo("Arrived at free space")
+        '''
 
+        #defintely doesnt move back to the original free space location
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0) # move back
+        self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2) # turn 
+        self.move_to([self.free_space[0], self.free_space[1], 180], 0) # move forward
+        self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
+        rospy.loginfo("Arrived at free space")
 
     def move_to(self, desired_state, desired_dir):
         # calculate amount to move in x, y, or radial directions
@@ -285,6 +304,8 @@ class run_tiago:
         # Calculating variables to reach goal
         if direction == 0:
             time = math.ceil(abs(distance)/self.linear_speed)
+            if time == 0:
+                time = 1.0
             pub_msg.linear.x = distance/time #slightly vary linear speed #error here after arrive at free space
         if direction == 1 :
             time = math.ceil(abs(distance)/self.linear_speed)
@@ -306,7 +327,7 @@ class run_tiago:
 
     def move_gripper(self, pos):
         #gripper is -0.09 to close and 0.09 to open
-        move_joint(["parallel_gripper_joint"], [pos])
+        self.move_joint(["parallel_gripper_joint"], [pos])
         # joint_msg = JointTrajectory()
         # joint_msg.joint_names = ["parallel_gripper_joint"]
 
@@ -333,14 +354,10 @@ class run_tiago:
 
             with sr.Microphone() as src:
                 self.listener.adjust_for_ambient_noise(src)
-                # self.listener.pause_threshold=1.2
-                self.listener.energy_threshold = 1932
-                self.listener.dynamic_energy_threshold = True
                 
                 rospy.loginfo("trying to listen")
-                # audio = self.listener.listen(src, timeout=10)
                 audio = self.listener.listen(src)
-                # audio = self.listener.record(source=mic, duration=10)
+                
                 rospy.loginfo("trying google recognition")
                 cmd = self.listener.recognize_google(audio, language = "en-EN")
                 cmd = cmd.lower()        
@@ -352,12 +369,32 @@ class run_tiago:
         rospy.loginfo("in send_cmd")
         cmd = self.get_voice_cmd()
         rospy.logdebug("Voice detected %s", cmd)
+
+        keyword = ""
+
         if (cmd == "hello"):
             self.say(cmd)
         elif(cmd == "good job"):
             self.say("")
         elif (cmd == "thank you"):
             self.say("you are welcome")
+        elif "water" in list_cmd:
+            self.say("getting the water bottle")
+            keyword = "water bottle"
+        elif "nuts" in list_cmd:
+            self.say("getting the mixed nuts")
+            keyword = "mixed nuts"
+        elif "medicine" in list_cmd or "pill" in list_cmd:
+            self.say("getting the pill bottle")
+            keyword = "pill bottle"
+        elif "oats" in list_cmd:
+            self.say("getting the oats")
+            keyword = "oats"
+        elif "vitamin" in list_cmd:
+            self.say("getting the vitamin bottle") 
+            keyword = "vitamins"
+
+        return self.aruco_dictionary(keyword) # will return the aruco id number
 
     def play_motion(self, motion_name, block=False):
         g = PlayMotionGoal()
@@ -368,23 +405,25 @@ class run_tiago:
             self.ac.send_goal_and_wait(g)
         else:
             self.ac.send_goal(g)
+            self.ac.wait_for_result()
 
 
     def move_joint(self, joint, joint_names, joint_positions, joint_velocities=None):
+        joint.wait_for_server()
         trajectory = JointTrajectory()
         trajectory.joint_names = joint_names
 
         jtp = JointTrajectoryPoint()
         trajectory.points.append(jtp)
         trajectory.points[0].positions = joint_positions
-        if joint_velocities is not None:
-            trajectory.points[0].velocities = joint_velocities
+        # if joint_velocities is not None:
+        #     trajectory.points[0].velocities = joint_velocities
         trajectory.points[0].time_from_start = rospy.Duration(2.0)
 
         goal_pos = FollowJointTrajectoryGoal()
         goal_pos.trajectory = trajectory
         goal_pos.goal_time_tolerance = rospy.Duration(0)
-        joint.wait_for_server(timeout=rospy.Duration(5))
+        
         
         joint.send_goal(goal_pos)
         joint.wait_for_result()
@@ -392,7 +431,7 @@ class run_tiago:
     
     def move_torso2(self, height):
         client = SimpleActionClient('torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-        client.wait_for_server(timeout=rospy.Duration(5))
+        client.wait_for_server()
 
         jtp = JointTrajectoryPoint()
         jtp.time_from_start = rospy.Duration(2)
@@ -405,6 +444,7 @@ class run_tiago:
 
         # Callbacks are not handled right now
         client.send_goal(goal)
+        client.wait_for_result()
      
     # def move_arm(self, pos):
     #     goal = FollowJointTrajectoryGoal()
@@ -419,12 +459,19 @@ class run_tiago:
     #     self.arm.wait_for_result()
 
     def keep_head_still(self):
+        '''
         node = '/pal_head_manager' 
         is_running = rosnode.rosnode_ping(node, max_count = 10)
         # print("Is the node " + node_name + " running?" + str(is_running))
         if is_running:
         # if the node is running, shut it down
             rosnode.kill_nodes([node_name])
+        '''
+        head_mgr_client = SimpleActionClient('/pal_head_manager/disable', DisableAction)
+        action = DisableGoal()
+        rospy.loginfo("disabling head manager")
+        action.duration = 0.0
+        head_mgr_client.send_goal(action)
 
 
     def move_head_to_position(self, pos):
@@ -457,6 +504,18 @@ class run_tiago:
         # disable head movement
         self.keep_head_still()
 
+    def save_pose(self, array):
+        global tiagoPose
+        tiagoPose = array.markers
+
+    def get_marker_pose(self, id):
+        for marker in tiagoPose:
+            if marker.id == id:
+                return marker.Pose
+            else:
+                continue
+        return None 
+
     def get_aruco(self, data):
         # Convert image data to OpenCV format
         self.cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
@@ -466,10 +525,10 @@ class run_tiago:
         self.camera_info = data.camera_info
         
         # Construct the camera matrix from intrinsic parameters
-        self.K = np.array(camera_info.K).reshape(3, 3)
+        self.K = np.array(self.camera_info.K).reshape(3, 3)
         
         # Construct the distortion coefficients
-        self.dist_coeffs = np.array(camera_info.D)
+        self.dist_coeffs = np.array(self.camera_info.D)
         
     def get_aruco_distance(self, item):
         # Define the ArUco dictionary and parameters
@@ -494,14 +553,14 @@ class run_tiago:
                     marker_center = np.mean(marker_corners, axis=0)
                     
                     # Convert the center point to a normalized ray in camera coordinates
-                    cx = camera_info.width / 2.0
-                    cy = camera_info.height / 2.0
-                    fx = K[0, 0]
-                    fy = K[1, 1]
+                    cx = self.camera_info.width / 2.0
+                    cy = self.camera_info.height / 2.0
+                    fx = self.K[0, 0]
+                    fy = self.K[1, 1]
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
-                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), self.K, self.dist_coeffs)[0]
                     
                     # Convert the point to 3D coordinates in the camera frame
                     table_p_c = np.array([x_c, y_c, z_c])
@@ -515,14 +574,14 @@ class run_tiago:
                     marker_center = np.mean(marker_corners, axis=0)
                     
                     # Convert the center point to a normalized ray in camera coordinates
-                    cx = camera_info.width / 2.0
-                    cy = camera_info.height / 2.0
-                    fx = K[0, 0]
-                    fy = K[1, 1]
+                    cx = self.camera_info.width / 2.0
+                    cy = self.camera_info.height / 2.0
+                    fx = self.K[0, 0]
+                    fy = self.K[1, 1]
                     x_c = (marker_center[0] - cx) / fx
                     y_c = (marker_center[1] - cy) / fy
                     z_c = 1.0
-                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), K, dist_coeffs)[0]
+                    x_c, y_c = cv2.undistortPoints(np.array([[x_c, y_c]]), self.K, self.dist_coeffs)[0]
                     
                     # Convert the point to 3D coordinates in the camera frame
                     p_c = np.array([x_c, y_c, z_c])
@@ -544,7 +603,7 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago(mode=5)
+    tiago = run_tiago(mode=6)
     # self.test_major_moves()
     # self.test_arm_movement()
 
