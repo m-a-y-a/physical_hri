@@ -220,7 +220,7 @@ class run_tiago:
         self.move_to([self.table_pos[0], self.drop_off_pos[1], 0], 2) # turn to drop off table
         self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 0], 0) # move to x = 2.15 in front of drop off table
         '''
-
+        # doesnt get close enough to the table
         self.move_to([self.table_pos[0], self.free_space[1], -90], 0) # back to center
         self.move_to([self.table_pos[0], self.free_space[1], 0], 2) # turn 
         self.move_to([self.drop_off_pos[0], self.free_space[1], 0], 0) # move forward
@@ -237,6 +237,8 @@ class run_tiago:
         self.move_to([self.free_space[0], self.free_space[1], -90], 0) # move in y dir back to center
         self.move_to([self.free_space[0], self.free_space[1], 30], 2) # face user
         '''
+
+        #defintely doesnt move back to the original free space location
         self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0) # move back
         self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2) # turn 
         self.move_to([self.free_space[0], self.free_space[1], 180], 0) # move forward
@@ -485,6 +487,18 @@ class run_tiago:
 
         # disable head movement
         self.keep_head_still()
+
+    def save_pose(self, array):
+        global tiagoPose
+        tiagoPose = array.markers
+
+    def get_marker_pose(self, id):
+        for marker in tiagoPose:
+            if marker.id == id:
+                return marker.Pose
+            else:
+                continue
+        return None 
 
     def get_aruco(self, data):
         # Convert image data to OpenCV format
