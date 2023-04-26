@@ -61,7 +61,7 @@ class run_tiago:
         self.free_space = [1.25, 1.75] # center of the "room"
         self.table_pos =  [1.925, 2.00] # table to pick up objects
         self.aruco_pos = [1.925, 2.60] # place to check aruco
-        self.drop_off_pos = [2.25, 1.00]
+        self.drop_off_pos = [2.25, 0.90]
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
         self.torso_height_table = 0.25
@@ -198,12 +198,12 @@ class run_tiago:
             rospy.loginfo("Arrived at drop off")
     
             # Reset: move back to center
-            self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0)   # move backwards in x direction to center
-            self.move_to([self.free_space[0], self.drop_off_pos[1], 90], 2)  # turn to left
-            self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 0) # reset angle
-            self.move_to([self.free_space[0], self.free_space[1], 0], 0)     # move in x dir back to center
-            self.move_to([self.free_space[0], self.free_space[1], -120], 2)  # face user
-            self.move_to([self.free_space[0], self.free_space[1], 150], 0)   # reset angle
+            self.move_to([self.free_space[0], self.drop_off_pos[1], 0], 0)          # move backwards in x direction to center
+            self.move_to([self.free_space[0], self.drop_off_pos[1], 90], 2)         # turn to left
+            self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 0)        # reset angle
+            self.move_to([self.free_space[0], self.free_space[1] + 0.15, 0], 0)     # move in x dir back to center
+            self.move_to([self.free_space[0], self.free_space[1], -120], 2)         # face user
+            self.move_to([self.free_space[0], self.free_space[1], 150], 0)          # reset angle
             rospy.loginfo("Arrived at free space")
         
         # End sequence
