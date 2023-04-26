@@ -369,6 +369,9 @@ class run_tiago:
         rospy.loginfo("in send_cmd")
         cmd = self.get_voice_cmd()
         rospy.logdebug("Voice detected %s", cmd)
+
+        keyword = ""
+
         if (cmd == "hello"):
             self.say(cmd)
         elif(cmd == "good job"):
@@ -377,14 +380,21 @@ class run_tiago:
             self.say("you are welcome")
         elif "water" in list_cmd:
             self.say("getting the water bottle")
+            keyword = "water bottle"
         elif "nuts" in list_cmd:
             self.say("getting the mixed nuts")
+            keyword = "mixed nuts"
         elif "medicine" in list_cmd or "pill" in list_cmd:
             self.say("getting the pill bottle")
+            keyword = "pill bottle"
         elif "oats" in list_cmd:
             self.say("getting the oats")
+            keyword = "oats"
         elif "" in list_cmd:
             self.say("getting the ________") # should change this one, i just dont know what the last object is 
+            keyword = "" # add whatever the key for the dictionary for the last item is here
+
+        return self.aruco_dictionary(keyword) # will return the aruco id number
 
     def play_motion(self, motion_name, block=False):
         g = PlayMotionGoal()
