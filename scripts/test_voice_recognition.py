@@ -53,7 +53,11 @@ def send_cmd():
             elif "oats" in list_cmd:
                 # self.say("getting the oats")
                 print("getting the oats")
+            elif "vitamin" in list_cmd:
+                # self.say("getting the vitamin bottle") 
+                print("getting the vitamin bottle")
             elif "done" in list_cmd:
+                # self.say("thank you for letting me help you today")
                 print("done")
                 return False
         except Exception as e:
