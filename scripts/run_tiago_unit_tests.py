@@ -48,7 +48,7 @@ class run_tiago:
         self.torso = SimpleActionClient('/torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # class variables
-        self.aruco_dictionary = {"water bottle": 8, "pill bottle": 12, "oats": 11, "mixed nuts": 10, "CHECK THIS ONE": 9}
+        self.aruco_dictionary = {"water bottle": 8, "pill bottle": 12, "oats": 11, "mixed nuts": 10, "vitamins": 9}
         self.camera_info = None
         self.dist_coeffs = None
         self.K = None
@@ -390,9 +390,9 @@ class run_tiago:
         elif "oats" in list_cmd:
             self.say("getting the oats")
             keyword = "oats"
-        elif "" in list_cmd:
-            self.say("getting the ________") # should change this one, i just dont know what the last object is 
-            keyword = "" # add whatever the key for the dictionary for the last item is here
+        elif "vitamin" in list_cmd:
+            self.say("getting the vitamin bottle") 
+            keyword = "vitamins"
 
         return self.aruco_dictionary(keyword) # will return the aruco id number
 
