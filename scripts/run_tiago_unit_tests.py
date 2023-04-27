@@ -17,6 +17,7 @@ from std_msgs.msg import String
 from std_srvs.srv import Empty
 from cv_bridge import CvBridge
 import speech_recognition as sr
+from aruco_msgs.msg import MarkerArray
 
 class run_tiago:
 
@@ -37,6 +38,7 @@ class run_tiago:
         # Camera info
         self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_aruco)
         self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_aruco)
+        self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
         self.bridge = CvBridge()
 
         # Client for preset motions
