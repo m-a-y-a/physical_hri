@@ -60,7 +60,7 @@ class run_tiago:
         self.global_origin = np.array([0, 0, 0])
         self.current_state = np.array([-0.35, 0.25, 0])
         
-        self.free_space = [1.25, 1.75]   # center of the "room"
+        self.free_space = [1.25, 1.50]   # center of the "room"
         self.table_pos =  [1.925, 2.10]  # table to pick up objects
         self.aruco_pos = [1.925, 2.30]   # place to check aruco
         self.drop_off_pos = [2.25, 1.15] # place to drop object
@@ -196,8 +196,8 @@ class run_tiago:
             rospy.loginfo("Request item")
 
             # Move to table
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)    # turn right
-            self.move_to([self.table_pos[0], self.free_space[1], 60], 0)     # move forward
+            self.move_to([self.free_space[0], self.free_space[1], 0], 2)     # turn right
+            self.move_to([self.table_pos[0], self.free_space[1], 0], 0)      # move forward
             self.move_to([self.table_pos[0], self.free_space[1], -90], 2)    # turn to face table
             self.move_to([self.table_pos[0], self.table_pos[1], -90], 0)     # move to in front of table
             rospy.loginfo("Arrived at Table")
