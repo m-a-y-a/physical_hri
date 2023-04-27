@@ -138,7 +138,7 @@ class run_tiago:
         self.torso.wait_for_result()
         
     def move_arm(self, pos):
-        self.right_arm.wait_for_server()
+        self.arm_right.wait_for_server()
         
         jtp = JointTrajectoryPoint()
         jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
@@ -149,8 +149,8 @@ class run_tiago:
         goal.trajectory.joint_names = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
         goal.trajectory.header.stamp = rospy.Time.now()
         goal.trajectory.points.append(jtp)
-        self.right_arm.send_goal(goal)
-        self.right_arm.wait_for_result()
+        self.arm_right.send_goal(goal)
+        self.arm_right.wait_for_result()
         
     def say(self, text):
         client = SimpleActionClient('/tts', TtsAction)
