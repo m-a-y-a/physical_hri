@@ -551,7 +551,7 @@ def main():
     rospy.init_node('tiago_server')
     rospy.loginfo("Initialize node and server")
 
-    tiago = run_tiago(mode=6)
+    tiago = run_tiago(mode=2)
 
     rospy.loginfo("Node and server initialized")
     tiago.run()
