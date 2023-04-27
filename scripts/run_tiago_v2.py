@@ -471,37 +471,6 @@ class run_tiago:
 
         return [x_global, y_global]
 
-    def get_cv_image(self, data):
-        # Convert image data to OpenCV format
-        self.cv_image = self.bridge.imgmsg_to_cv2(data, desired_encoding='passthrough')
-        print(self.cv_image)
-        
-    def get_camera_info(self, data):
-        # Access the camera intrinsic parameters
-        self.camera_info = data.camera_info
-        
-        # Construct the camera matrix from intrinsic parameters
-        self.K = np.array(self.camera_info.K).reshape(3, 3)
-        
-        # Construct the distortion coefficients
-        self.dist_coeffs = np.array(self.camera_info.D)
-        
-    def get_aruco_distance(self, item):
-        # Define the ArUco dictionary and parameters
-        aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_1000)
-        aruco_params = cv2.aruco.DetectorParameters_create()
-        marker_size = 0.08  # marker is 8 cm
-        
-        # Detect the markers in the image
-        corners, ids, rejected_img_points = cv2.aruco.detectMarkers(self.cv_image, aruco_dict, parameters=aruco_params)
-        rospy.loginfo("ids found {0}".format(ids))
-        
-        # Check if any markers were detected
-        if ids is not None:
-            # Loop over all detected markers
-            rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_size, self.K, self.dist_coeffs)
-            for i in range(len(ids)):
-                self.tag_distances(ids[i]) = tvecs[i]      
                 
     def main():
         rospy.init_node('tiago_server')
