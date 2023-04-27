@@ -62,7 +62,7 @@ class run_tiago:
         
         self.free_space = [1.25, 1.75]   # center of the "room"
         self.table_pos =  [1.925, 2.10]  # table to pick up objects
-        self.aruco_pos = [1.5, 1.7]   # place to check aruco
+        self.aruco_pos = [1.5, 1.6]   # place to check aruco
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
