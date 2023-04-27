@@ -33,8 +33,8 @@ class run_tiago:
         self.rate = rospy.Rate(1)
 
         # Camera info
-        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image(data))
-        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info(data))
+        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image)
+        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info)
         self.bridge = CvBridge()
 
         # Client for preset motions
@@ -81,14 +81,14 @@ class run_tiago:
         # Move to center of the room
         self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
         self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-        self.move_to([self.free_space[0], self.free_space[1], -90], 0)        # move in robot y
+        self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
         rospy.loginfo("Arrived at free space")
         
         # Move to get aruco measures
         self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
         self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
         self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)      # move to in front of table
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
         rospy.loginfo("Arrived at Table")
         
         # Take photo
@@ -138,7 +138,7 @@ class run_tiago:
         self.torso.wait_for_result()
         
     def move_arm(self, pos):
-        self.right_arm.wait_for_server()
+        self.arm_right.wait_for_server()
         
         jtp = JointTrajectoryPoint()
         jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
@@ -149,8 +149,8 @@ class run_tiago:
         goal.trajectory.joint_names = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
         goal.trajectory.header.stamp = rospy.Time.now()
         goal.trajectory.points.append(jtp)
-        self.right_arm.send_goal(goal)
-        self.right_arm.wait_for_result()
+        self.arm_right.send_goal(goal)
+        self.arm_right.wait_for_result()
         
     def say(self, text):
         client = SimpleActionClient('/tts', TtsAction)
