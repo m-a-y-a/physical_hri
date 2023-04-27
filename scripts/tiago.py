@@ -109,17 +109,17 @@ class run_tiago:
             rospy.loginfo("Mode is %s" % str(self.mode))
             
             # Move to center of the room
-            self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
-            self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-            self.move_to([self.free_space[0], self.free_space[1], 0], 0)        # move in robot y
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
+            self.move_to([self.free_space[0], 0, 0], 0)                     # move in robot x
+            self.move_to([self.free_space[0], 0, -90], 2)                   # turn right
+            self.move_to([self.free_space[0], self.free_space[1], -90], 0)  # move in robot y
+            self.move_to([self.free_space[0], self.free_space[1], 60], 2)   # turn to user
             rospy.loginfo("Arrived at free space")
             
             # Move close to table
             self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
             self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
             self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
-            self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)      # move to in front of table
+            self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
             rospy.loginfo("Arrived at Table")
             
             x_diff, y_diff = self.get_aruco_distance(100)
@@ -165,10 +165,10 @@ class run_tiago:
         rospy.loginfo("Entering the Scene")
 
         # Move to center of the room
-        self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
-        self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-        self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
-        self.move_to([self.free_space[0], self.free_space[1], 60], 2)       # turn to user
+        self.move_to([self.free_space[0], 0, 0], 0)                     # move in robot x
+        self.move_to([self.free_space[0], 0, -90], 2)                   # turn right
+        self.move_to([self.free_space[0], self.free_space[1], -90], 0)  # move in robot y
+        self.move_to([self.free_space[0], self.free_space[1], 60], 2)   # turn to user
         rospy.loginfo("Arrived at free space")
 
         # For every object on the inventory table:
@@ -178,26 +178,26 @@ class run_tiago:
             rospy.loginfo("Request item")
 
             # Move to table
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)    # turn right
-            self.move_to([self.table_pos[0], self.free_space[1], 60], 0)     # move forward
-            self.move_to([self.table_pos[0], self.free_space[1], -90], 2)    # turn to face table
-            self.move_to([self.table_pos[0], self.table_pos[1], -90], 0)     # move to in front of table
+            self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
+            self.move_to([self.table_pos[0], self.free_space[1], 0], 0)     # move forward
+            self.move_to([self.table_pos[0], self.free_space[1], -90], 2)   # turn to face table
+            self.move_to([self.table_pos[0], self.table_pos[1], -90], 0)    # move to in front of table
             rospy.loginfo("Arrived at Table")
 
             # Perform Pick and Place
 
             # Bring item to user
-            self.move_to([self.table_pos[0], self.table_pos[1], 0], 2)           # turn left
-            self.move_to([self.drop_off_pos[0], self.table_pos[1], 0], 0)        # move left to drop off x
-            self.move_to([self.drop_off_pos[0], self.table_pos[1], 90], 2)       # turn left
-            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)    # move to side of drop off table
+            self.move_to([self.table_pos[0], self.table_pos[1], 0], 2)          # turn left
+            self.move_to([self.drop_off_pos[0], self.table_pos[1], 0], 0)       # move left to drop off x
+            self.move_to([self.drop_off_pos[0], self.table_pos[1], 90], 2)      # turn left
+            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)   # move to side of drop off table
             rospy.loginfo("Arrived at drop off")
     
             # Reset: move back to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0)       # move backwards in x direction to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2)      # turn to left
-            self.move_to([self.free_space[0], self.free_space[1], 180], 0)        # move in y dir back to center
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)         # face user
+            self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0)         # move backwards in x direction to center
+            self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2)        # turn to left
+            self.move_to([self.free_space[0], self.free_space[1], 180], 0)          # move in x dir back to center
+            self.move_to([self.free_space[0], self.free_space[1], 60], 2)           # face user
             rospy.loginfo("Arrived at free space")
         
         # End sequence
@@ -222,6 +222,10 @@ class run_tiago:
             # global: +x, -x, +y, -y 
             # local: +x, -x, -y, +y
             y_d = -y_d
+        elif self.current_state[2] == 180:
+            # global: +x, -x, +y, -y 
+            # local: -x, +x, +y, -y 
+            x_d = -x_d 
         elif self.current_state[2] < 0 : #CW
             # global: +x, -x, +y, -y 
             # local: +y, -y, +x, -x
