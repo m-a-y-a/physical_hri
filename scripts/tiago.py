@@ -60,7 +60,7 @@ class run_tiago:
         self.global_origin = np.array([0, 0, 0])
         self.current_state = np.array([-0.35, 0.25, 0])
         
-        self.free_space = [1.25, 1.75]   # center of the "room"
+        self.free_space = [1.25, 1.50]   # center of the "room"
         self.table_pos =  [1.925, 2.10]  # table to pick up objects
         self.aruco_pos = [1.925, 2.30]   # place to check aruco
         self.drop_off_pos = [2.25, 1.15] # place to drop object
