@@ -33,8 +33,8 @@ class run_tiago:
         self.rate = rospy.Rate(1)
 
         # Camera info
-        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image(data))
-        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info(data))
+        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image)
+        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info)
         self.bridge = CvBridge()
 
         # Client for preset motions
@@ -81,14 +81,14 @@ class run_tiago:
         # Move to center of the room
         self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
         self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-        self.move_to([self.free_space[0], self.free_space[1], -90], 0)        # move in robot y
+        self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
         rospy.loginfo("Arrived at free space")
         
         # Move to get aruco measures
         self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
         self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
         self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)      # move to in front of table
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
         rospy.loginfo("Arrived at Table")
         
         # Take photo
