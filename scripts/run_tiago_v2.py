@@ -104,6 +104,7 @@ class run_tiago:
         while True:
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
             if self.aruco_markers:
+                rospy.loginfo("got markers")
                 break
 
         # Move back to center
