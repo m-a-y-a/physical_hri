@@ -196,8 +196,8 @@ class run_tiago:
             rospy.loginfo("Request item")
 
             # Move to table
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)    # turn right
-            self.move_to([self.table_pos[0], self.free_space[1], 60], 0)     # move forward
+            self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
+            self.move_to([self.table_pos[0], self.free_space[1], 0], 0)     # move forward
             self.move_to([self.table_pos[0], self.free_space[1], -90], 2)    # turn to face table
             self.move_to([self.table_pos[0], self.table_pos[1], -90], 0)     # move to in front of table
             rospy.loginfo("Arrived at Table")
