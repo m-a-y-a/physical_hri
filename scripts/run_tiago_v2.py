@@ -101,11 +101,14 @@ class run_tiago:
         rospy.loginfo("Please start the pose subscriber")
         rospy.sleep(7)
 
-        while True:
+        for i in range(10):
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
             if self.aruco_markers:
                 rospy.loginfo("got markers")
                 break
+
+        if not self.aruco_markers:
+            rospy.loginfo("sorry, could not find the markers")
 
         # Move back to center
         self.move_to([self.aruco_pos[0], self.aruco_pos[1], 180], 2)       # turn right
@@ -487,7 +490,8 @@ class run_tiago:
 
 if __name__ == "__main__":
     try:
-        main()
+        tiago = run_tiago()
+        tiago.main()
     except rospy.ROSInterruptException:
         pass
             
