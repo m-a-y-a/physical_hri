@@ -34,10 +34,10 @@ class run_tiago:
         self.rate = rospy.Rate(1)
 
         # Camera info
-        self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image)
-        self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info)
-        self.bridge = CvBridge()
-
+        # self.img_raw_sub = rospy.Subscriber('xstation/rgb/image_raw', Image, self.get_cv_image)
+        # self.cam_intrinsic_sub = rospy.Subscriber('xstation/rgb/camera_info/camera_intrinsic', CameraInfo, self.get_camera_info)
+        # self.bridge = CvBridge()
+         
         # Client for preset motions
         self.ac = SimpleActionClient('/play_motion', PlayMotionAction)
         rospy.loginfo("Connecting to /play_motion...")
