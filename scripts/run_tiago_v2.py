@@ -480,18 +480,17 @@ class run_tiago:
         return [x_global, y_global]
 
                 
-    def main():
-        rospy.init_node('tiago_server')
-        rospy.loginfo("Initialize node and server")
+def main():
+    rospy.init_node('tiago_server')
+    rospy.loginfo("Initialize node and server")
 
-        tiago = run_tiago()
-        rospy.loginfo("Node and server initialized")
-        tiago.run()
+    tiago = run_tiago()
+    rospy.loginfo("Node and server initialized")
+    tiago.run()
 
 if __name__ == "__main__":
     try:
-        tiago = run_tiago()
-        tiago.main()
+        main()
     except rospy.ROSInterruptException:
         pass
             
