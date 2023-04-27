@@ -100,7 +100,11 @@ class run_tiago:
 
         rospy.loginfo("Please start the pose subscriber")
         rospy.sleep(7)
-        self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
+
+        while True:
+            self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
+            if self.aruco_markers:
+                break
 
         # Move back to center
         self.move_to([self.aruco_pos[0], self.aruco_pos[1], 180], 2)       # turn right
