@@ -12,7 +12,7 @@ import numpy as np
 from actionlib import SimpleActionClient
 from pal_interaction_msgs.msg import TtsAction, TtsGoal
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
-from pal_common_msgs.msg import DisableGoal, DisableAction
+from pal_common_msgs.msg import DisableGoal, DisableActionGoal
 from std_msgs.msg import String
 from std_srvs.srv import Empty
 from cv_bridge import CvBridge
@@ -77,32 +77,32 @@ class run_tiago:
         self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
 
     def run(self):
-        # Enter the scene
-        rospy.loginfo("Entering the Scene")
+        # # Enter the scene
+        # rospy.loginfo("Entering the Scene")
         
-        # Move to center of the room
-        self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
-        self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-        self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
-        rospy.loginfo("Arrived at free space")
+        # # Move to center of the room
+        # self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
+        # self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
+        # self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
+        # rospy.loginfo("Arrived at free space")
         
-        # Move to get aruco measures
-        self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
-        self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
-        self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
-        rospy.loginfo("Arrived at Table")
+        # # Move to get aruco measures
+        # self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
+        # self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
+        # self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
+        # self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
+        # rospy.loginfo("Arrived at Table")
         
         # Take photo
         self.move_head_to_position(self.head_rot_table)
         self.move_torso(self.torso_height_aruco)
-        self.tag_distances = get_aruco_distance()
+        #self.tag_distances = self.get_aruco_distance()
 
         rospy.loginfo("Please start the pose subscriber")
         rospy.sleep(7)
 
         for i in range(10):
-            self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
+            self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             if self.aruco_markers:
                 rospy.loginfo("got markers")
                 break
@@ -175,7 +175,7 @@ class run_tiago:
         client.send_goal_and_wait(goal)
         return
         
-    def do_cmd(msg):
+    def do_cmd(self,msg):
         if (msg == "thank you"):
             # Reset: move back to center
             self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0)       # move backwards in x direction to center
@@ -217,7 +217,7 @@ class run_tiago:
                 # Call AruCo tag identifier
                 item_id = self.aruco_dictionary[msg]
                 pose = self.get_marker_pose(item_id)
-                [global_x, global_y] = calc_coords_of_object(pose)
+                [global_x, global_y] = self.calc_coords_of_object(pose)
                 rospy.loginfo("got coords of item {2}: {0}, {1}".format(x, y, msg))
                 # item_pos = [x, y]
 
@@ -235,8 +235,8 @@ class run_tiago:
                 self.body_to_midline = 0.225 # y
                 self.center_to_palm = 0.8 # x
 
-                local_x = global_x - body_to_midline
-                local_y = global_y - center_to_palm
+                local_x = global_x - self.body_to_midline
+                local_y = global_y - self.center_to_palm
 
                 # Move to table
                 self.move_to([self.free_space[0], self.free_space[1], 0], 2)     # turn right
@@ -377,7 +377,7 @@ class run_tiago:
             
             # Perform action based on word
             if (cmd == "hello"):
-                play_motion('wave', block = True)
+                self.play_motion('wave', block = True)
                 self.say("Hi, my name is Tiago. What’s yours?")
             elif(cmd == "good"):
                 self.say("That’s great! How can I help you today?")
@@ -421,10 +421,10 @@ class run_tiago:
                 self.say("Sorry, I don't recognize that command.")
     
     def keep_head_still(self):
-        head_mgr_client = rospy.Publisher('/pal_head_manager/disable', DisableAction)
-        motion = DisableGoal()
+        head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal)
+        motion = DisableActionGoal()
         rospy.loginfo("disabling head manager")
-        motion.duration = 10.0
+        motion.goal.duration = 10.0
         head_mgr_client.publish(motion)
         
         rospy.sleep(5)
@@ -465,11 +465,11 @@ class run_tiago:
                 continue
         return None 
 
-    def calc_coords_of_object(pose):
+    def calc_coords_of_object(self,pose):
         x_from_base = pose.position.x
         y_from_base = pose.position.y
         z_from_base = pose.position.z
-        ropsy.loginfo("got aruco positions {0)".format((x_from_base, y_from_base, z_from_base)))
+        rospy.loginfo("got aruco positions {0)".format((x_from_base, y_from_base, z_from_base)))
 
         #need to add logic here
         self.body_to_midline = 0.225 # y
