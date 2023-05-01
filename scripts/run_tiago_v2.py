@@ -134,15 +134,16 @@ class run_tiago:
 
         # AruCo Tag indentifier 
         # The function will return tag coordinates in terms of robot coordinate frame, where +x:forwards and +y:left
-        global_x  = 1.0                 # example
-        global_y = -0.5                 # example 
+        # item_id = self.aruco_dictionary[msg]
+        # pose = self.get_marker_pose(item_id)
+        pose = [0.95, -0.37]                        # marker is top right of robot
 
         # Make calculations to grasp
         # In the grid-world coordinate frame, +x:left and +y:forward
         self.body_to_midline = 0.225    # y
         self.center_to_palm = 0.8       # x
-        local_x = global_y + self.body_to_midline
-        local_y = global_x - self.center_to_palm
+        local_x = pose[1] + self.body_to_midline    # move right by ~0.15m (-x direction)
+        local_y = pose[0] - self.center_to_palm     # move forwards by ~0.15m (+y direction)
 
         # Move to get item
         self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)         # turn left
