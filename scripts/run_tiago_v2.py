@@ -60,9 +60,9 @@ class run_tiago:
         self.global_origin = np.array([0, 0, 0])
         self.current_state = np.array([-0.35, 0.25, 0])
         
-        self.free_space = [1.25, 1.75]   # center of the "room"
         self.table_pos =  [1.925, 2.10]  # table to pick up objects
         self.aruco_pos = [1.5, 1.6]   # place to check aruco
+        self.free_space = [1.25, self.aruco_pos[1]] #center of the "room" (originally [1.25, 1.75])
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
@@ -77,26 +77,25 @@ class run_tiago:
         self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
 
     def run(self):
-        # # Enter the scene
-        # rospy.loginfo("Entering the Scene")
         
-        # # Move to center of the room
-        # self.move_to([self.free_space[0], 0, 0], 0)                         # move in robot x
-        # self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
-        # self.move_to([self.free_space[0], self.free_space[1], -90], 0)      # move in robot y
-        # rospy.loginfo("Arrived at free space")
-        
-        # # Move to get aruco measures
-        # self.move_to([self.free_space[0], self.free_space[1], 0], 2)    # turn right
-        # self.move_to([self.aruco_pos[0], self.free_space[1], 0], 0)     # move forward
-        # self.move_to([self.aruco_pos[0], self.free_space[1], -90], 2)   # turn to face table
-        # self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 0)    # move to in front of table
-        # rospy.loginfo("Arrived at Table")
-        
+        # Enter the scene
+        rospy.loginfo("Entering the Scene")
+
+        # Move to center of the room 
+        self.move_to([self.free_space[0], 0, 0], 0)                         # move forward
+        self.move_to([self.free_space[0], 0, -90], 2)                       # turn right
+        self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)       # move forward (free_space[1]==aruco_pos[1])
+        rospy.loginfo("Arrived at free space")
+
+        # Move to get aruco measures
+        self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)         # turn left
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)          # move forward
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 2)        # turn to face table
+        rospy.loginfo("Arrived at Table")
+
         # Take photo
         self.move_head_to_position(self.head_rot_table)
         self.move_torso(self.torso_height_aruco)
-        #self.tag_distances = self.get_aruco_distance()
 
         rospy.loginfo("Please start the pose subscriber")
         rospy.sleep(7)
@@ -111,19 +110,89 @@ class run_tiago:
             rospy.loginfo("sorry, could not find the markers")
 
         # Move back to center
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], 180], 2)       # turn right
-        self.move_to([self.free_space[0], self.aruco_pos[1], 180], 0)      # move in robot x
-        self.move_to([self.free_space[0], self.aruco_pos[1], 90], 2)       # turn right
-        self.move_to([self.free_space[0], self.free_space[1], 90], 2)      # move forwards
-        self.move_to([self.free_space[0], self.free_space[1], 60], 2)      # turn to user
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -180], 2)       # turn right
+        self.current_state[2] = 180                                         # flip sign convention (-180==180 deg)
+        self.move_to([self.free_space[0], self.aruco_pos[1], 180], 0)       # move forward
+        self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)        # turn to user
         rospy.loginfo("Arrived at free space")
-        
+    
+
+        '''
         # self.play_motion('home', block = True)
         
         # Call for speech recognition
         self.send_cmd()
 
         self.rate.sleep()
+        '''
+
+        self.get_item_simulation_test()
+
+    def get_item_simulation_test(self):
+
+        rospy.loginfo("Getting one item from the table")
+
+        # AruCo Tag indentifier 
+        # The function will return tag coordinates in terms of robot coordinate frame, where +x:forwards and +y:left
+        global_x  = 1.0                 # example
+        global_y = -0.5                 # example 
+
+        # Make calculations to grasp
+        # In the grid-world coordinate frame, +x:left and +y:forward
+        self.body_to_midline = 0.225    # y
+        self.center_to_palm = 0.8       # x
+        local_x = global_y + self.body_to_midline
+        local_y = global_x - self.center_to_palm
+
+        # Move to get item
+        self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)         # turn left
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)          # move forward
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 2)        # turn to face table
+        rospy.loginfo("Arrived at Table")
+
+        # Move torso and arm to position
+        self.play_motion('offer_right', block = True)
+        self.move_torso(0.24)
+        self.move_arm([1.50, 0.46, 0.09, 0.39, -1.45, 0.03, 0.00])
+        self.move_to([self.aruco_pos[0] + local_x, self.aruco_pos[1], -90], 1)              # moving to adjusted position calculation side-to-side
+        self.move_to([self.aruco_pos[0] + local_x, self.aruco_pos[1] + local_y, -90], 0)    # moving to adjusted position calculation forwards
+
+        # Grab item
+        rospy.loginfo("Found object. Grasping.")
+        # self.grasp
+
+        # Move back to table position
+        self.move_to([self.aruco_pos[0] + local_x, self.aruco_pos[1], -90], 0)      # back out
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)                # move side-to-side
+        rospy.loginfo("Arrived at Table")
+
+        # Move to dropoff table
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 2)             # turn
+        self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 0], 0)          # move forward
+        self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 90], 2)         # turn
+        self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)      # move forward to side of drop off table
+        rospy.loginfo("Arrived at drop off")    
+                
+        # Lower torso
+        self.move_torso(0.05)
+                
+        # Release item
+        # self.grasp
+
+        # Return torso and tuck arm
+        self.move_torso(0.14)
+        self.move_arm([-1.10, 1.47, 2.71, 1.71, -1.57, 1.37, -2.24])
+
+        # Move back to center
+        self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
+        self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
+        self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
+        self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2)        # turn
+        self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)           # move forward
+        self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)            # turn to user
+        rospy.loginfo("Arrived at free space")
+
+
         
     def play_motion(self, motion_name, block=False):
         g = PlayMotionGoal()
@@ -160,7 +229,7 @@ class run_tiago:
         jtp.time_from_start = rospy.Duration(2.0)
         
         goal = FollowJointTrajectoryGoal()
-        goal.trajectory.joint_names = ['arm_1_joint', 'arm_2_joint', 'arm_3_joint', 'arm_4_joint', 'arm_5_joint', 'arm_6_joint', 'arm_7_joint']
+        goal.trajectory.joint_names = ['arm_right_1_joint', 'arm_right_2_joint', 'arm_right_3_joint', 'arm_right_4_joint', 'arm_right_5_joint', 'arm_right_6_joint', 'arm_right_7_joint']
         goal.trajectory.header.stamp = rospy.Time.now()
         goal.trajectory.points.append(jtp)
         self.arm_right.send_goal(goal)
@@ -218,7 +287,7 @@ class run_tiago:
                 item_id = self.aruco_dictionary[msg]
                 pose = self.get_marker_pose(item_id)
                 [global_x, global_y] = self.calc_coords_of_object(pose)
-                rospy.loginfo("got coords of item {2}: {0}, {1}".format(x, y, msg))
+                rospy.loginfo("got coords of item {2}: {0}, {1}".format(global_x, global_y, msg))
                 # item_pos = [x, y]
 
                 # Reply
@@ -287,7 +356,7 @@ class run_tiago:
             # global: +x, -x, +y, -y 
             # local: +x, -x, -y, +y
             y_d = -y_d
-        elif self.current_state[2] == 180:
+        elif abs(self.current_state[2]) == 180:
             # global: +x, -x, +y, -y 
             # local: -x, +x, +y, -y 
             x_d = -x_d 
@@ -334,12 +403,18 @@ class run_tiago:
         # Calculating variables to reach goal
         if direction == 0:
             time = math.ceil(abs(distance)/self.linear_speed)
+            if time == 0:
+                time = 1
             pub_msg.linear.x = distance/time #slightly vary linear speed
         if direction == 1 :
             time = math.ceil(abs(distance)/self.linear_speed)
+            if time == 0:
+                time = 1 
             pub_msg.linear.y = distance/time #slightly vary linear speed
         if direction == 2 :
             time = math.ceil(abs(distance)/self.angular_speed)
+            if time == 0:
+                time = 1
             pub_msg.angular.z = distance/time #slightly vary angular speed 
 
         # Publishing the goal according to the time duration of the client's request
@@ -371,8 +446,9 @@ class run_tiago:
             
     def send_cmd(self):
         cmd = ""
+        end = False
         while end == False:
-            cmd = self.get_voice_cmd(self)
+            cmd = self.get_voice_cmd()
             rospy.logdebug("Voice detected %s", cmd)
             
             # Perform action based on word
