@@ -22,8 +22,6 @@ from aruco_msgs.msg import MarkerArray
 class run_tiago:
 
     def __init__(self, mode=1):
-
-        self.cnt = 0
         self.gripper_pub = rospy.Publisher("/parallel_gripper_right_controller/command", JointTrajectory, queue_size=5, latch=True)
         self.arm_pub = rospy.Publisher("/arm_right_controller/command", JointTrajectory, queue_size=5, latch=True)
         self.head_pub = rospy.Publisher('/head_controller/point_head_action/goal', PointHeadActionGoal, queue_size=1, latch=True)
@@ -43,7 +41,7 @@ class run_tiago:
         self.head = SimpleActionClient('head_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
 
         # Class variables
-        self.aruco_pos = {8: [0, 0, 0], 9: [0, 0, 0], 10: [0, 0, 0], 11: [0, 0, 0], 12: [0, 0, 0]}    
+        self.aruco_pos_dict = {8: [0, 0, 0], 9: [0, 0, 0], 10: [0, 0, 0], 11: [0, 0, 0], 12: [0, 0, 0]}    
         self.aruco_dictionary = {"water bottle": 8, "medicine bottle": 12, "oats": 11, "mixed nuts": 10, "vitamin": 9}
         self.linear_speed = rospy.get_param("~start_linear_speed", 0.2) #m/s
         self.angular_speed = rospy.get_param("~start_angular_speed", 0.3) #rad/s
@@ -96,10 +94,10 @@ class run_tiago:
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             if self.aruco_markers:
                 rospy.loginfo("Found the markers")
-                for key in self.aruco_pos:
+                for key in self.aruco_pos_dict:
                     pose = self.get_marker_pose(key)
                     [global_x, global_y] = self.calc_coords_of_object(pose)
-                    self.aruco_pos[key] = [global_x, global_y, 0]
+                    self.aruco_pos_dict[key] = [global_x, global_y, 0]
                 break
 
         if not self.aruco_markers:
@@ -209,13 +207,10 @@ class run_tiago:
                 # Call AruCo tag identifier
                 item_id = self.aruco_dictionary[msg]
                 
-                [global_x, global_y, z] = self.aruco_pos[item_id]
+                [global_x, global_y, z] = self.aruco_pos_dict[item_id]
 
                 # Reply
                 self.say("Yes, I will get you the " + msg)
-
-                local_y = global_x - self.body_to_midline   # used as y value for robot
-                local_x = global_y - self.center_to_palm    # used as x value for robot
 
                 # Move to table
                 self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)      # turn right
@@ -232,14 +227,14 @@ class run_tiago:
                 # Move arm
                 self.move_arm(self.right_arm_full_extension)
 
-                self.move_to([local_x, self.aruco_pos[1] -90], 1) # moving to adjusted position calculation side-to-side
-                self.move_to([local_x, local_y, -90], 0)          # moving to adjusted position calculation forwards
+                self.move_to([global_x, self.aruco_pos[1] -90], 1)  # moving to adjusted position calculation side-to-side
+                self.move_to([global_x, global_y, -90], 0)          # moving to adjusted position calculation forwards
 
                 # Grab item
                 self.grasp
 
                 # Bring item to user
-                self.move_to([local_x, self.aruco_pos[1], -90], 0)                   # move backwards
+                self.move_to([global_x, self.aruco_pos[1], -90], 0)                  # move backwards
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)         # move sideways
                 
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 2)           # turn left
@@ -467,8 +462,8 @@ class run_tiago:
         z_from_base = pose.position.z
         rospy.loginfo("got aruco positions {0)".format((x_from_base, y_from_base, z_from_base)))
 
-        y_global = self.aruco_pos[1] + x_from_base
-        x_global = self.aruco_pos[0] + y_from_base
+        y_global = self.aruco_pos[1] + x_from_base - self.center_to_palm
+        x_global = self.aruco_pos[0] + y_from_base - self.body_to_midline
 
         return [x_global, y_global]
 
