@@ -463,7 +463,7 @@ class run_tiago:
         rospy.loginfo("got aruco positions {0)".format((x_from_base, y_from_base, z_from_base)))
 
         y_global = self.aruco_pos[1] + x_from_base - self.center_to_palm
-        x_global = self.aruco_pos[0] + y_from_base - self.body_to_midline
+        x_global = self.aruco_pos[0] + y_from_base + self.body_to_midline
 
         return [x_global, y_global]
 
