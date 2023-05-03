@@ -425,9 +425,10 @@ class run_tiago:
         motion.goal.duration = 10.0
         head_mgr_client.publish(motion)
         
-        rospy.sleep(10)
+        rospy.sleep(3)
 
     def move_head_to_position(self, pos):
+
         # Create a publisher to send joint trajectory commands
         self.head.wait_for_server()
 
