@@ -428,6 +428,8 @@ class run_tiago:
         rospy.sleep(3)
 
     def move_head_to_position(self, pos):
+        # Disable head movement
+        self.keep_head_still()
 
         # Create a publisher to send joint trajectory commands
         self.head.wait_for_server()
@@ -448,8 +450,6 @@ class run_tiago:
         self.head.wait_for_result()
         self.head.send_goal(goal)
 
-        # Disable head movement
-        self.keep_head_still()
 
     def save_pose(self, array):
         self.markerPoses = array.markers
