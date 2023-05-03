@@ -435,16 +435,16 @@ class run_tiago:
         self.head.wait_for_server()
 
         # Create a JointTrajectory message
-        jtp = JointTrajectoryPoint()
-        jtp.positions = [pos[0], pos[1]]
-        jtp.time_from_start = rospy.Duration(2.0)
+        # jtp = JointTrajectoryPoint()
+        # jtp.positions = [pos[0], pos[1]]
+        # jtp.time_from_start = rospy.Duration(2.0)
 
         # Set the joint names for the trajectory
         goal = FollowJointTrajectoryGoal()
         goal.trajectory.joint_names = ['head_1_joint', 'head_2_joint']
         goal.trajectory.header.stamp = rospy.Time.now()
         # goal.trajectory.points.append(jtp)
-        goal.trajectory.points[0].positions = [pos[0], pos[1]]
+        goal.trajectory.points[0].positions = pos
         goal.trajectory.points[0].time_from_start = rospy.Duration(2.0)
 
         self.head.wait_for_result()
