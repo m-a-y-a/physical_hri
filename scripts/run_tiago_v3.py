@@ -54,6 +54,7 @@ class run_tiago:
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
+        self.tuck_arm = [-1.10, 1.47, 2.71, 1.71, -1.57, 1.37, -2.24]
         self.torso_height_table = 0.24
         self.torso_height_aruco = 0.30
         self.torso_height_dropoff_table = 0.05
@@ -168,26 +169,26 @@ class run_tiago:
     def do_cmd(self,msg):
         if (msg == "thank you"):
             # Reset: move back to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0)       # move backwards in x direction to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2)      # turn to left
-            self.move_to([self.free_space[0], self.free_space[1], 180], 0)        # move in y dir back to center
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)         # face user
+            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
+            self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
+            self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
+            self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2)        # turn
+            self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)           # move forward
+            self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)            # turn to user
             rospy.loginfo("Arrived at free space")
-            
-            self.play_motion('home', block = True)
             
             # Reply
             self.say("You’re welcome. What else can I get you?")
             
         elif ("this is wrong"):
             # Reset: move back to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 90], 0)       # move backwards in x direction to center
-            self.move_to([self.drop_off_pos[0], self.free_space[1], 180], 2)      # turn to left
-            self.move_to([self.free_space[0], self.free_space[1], 180], 0)        # move in y dir back to center
-            self.move_to([self.free_space[0], self.free_space[1], 60], 2)         # face user
+            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
+            self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
+            self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
+            self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2)        # turn
+            self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)           # move forward
+            self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)            # turn to user
             rospy.loginfo("Arrived at free space")
-            
-            self.play_motion('home', block = True)
             
             # Reply
             self.say("I’m sorry for my mistake. Can I get you something else?")
@@ -206,48 +207,57 @@ class run_tiago:
             try:
                 # Call AruCo tag identifier
                 item_id = self.aruco_dictionary[msg]
-                
-                [global_x, global_y, z] = self.aruco_pos_dict[item_id]
+                pose = self.get_marker_pose(item_id)
+                global_x = pose.position.x + self.aruco_pos[1]
+                global_y = pose.position.y + self.aruco_pos[0]
 
                 # Reply
                 self.say("Yes, I will get you the " + msg)
+
+                local_y = global_x - self.center_to_palm     # used as y value for robot
+                local_x = global_y + self.body_to_midline    # used as x value for robot
 
                 # Move to table
                 self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)      # turn right
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)       # move forward
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 2)     # turn to face table
                 rospy.loginfo("Arrived at Table")
-                
+                        
+                # Offer arm
+                self.move_torso(self.torso_height_table)
+                self.play_motion('offer_right', block = True)
+
                 # Move torso up
                 self.move_torso(self.torso_height_table)
-                
-                # Offer arm
-                self.play_motion('offer_right', block = True)
-                
+                        
                 # Move arm
                 self.move_arm(self.right_arm_full_extension)
 
-                self.move_to([global_x, self.aruco_pos[1] -90], 1)  # moving to adjusted position calculation side-to-side
-                self.move_to([global_x, global_y, -90], 0)          # moving to adjusted position calculation forwards
+                self.move_to([local_x, self.aruco_pos[1], -90], 1) # moving to adjusted position calculation side-to-side
+                self.move_to([local_x, local_y, -90], 0)          # moving to adjusted position calculation forwards
+                rospy.loginfo("Moved sideways by %s, Moved forward by %s", local_x, local_y) #ADDED FOR DEBUG
 
                 # Grab item
                 self.grasp
 
                 # Bring item to user
-                self.move_to([global_x, self.aruco_pos[1], -90], 0)                  # move backwards
+                self.move_to([local_x, self.aruco_pos[1], -90], 0)                   # move backwards
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)         # move sideways
-                
+                        
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 2)           # turn left
                 self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 0], 0)        # move left to drop off x
                 self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 90], 2)       # turn left
                 self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)    # move to side of drop off table
                 rospy.loginfo("Arrived at drop off")
-                
+                        
                 # Lower torso
                 self.move_torso(self.torso_height_dropoff_table)
-                
+                        
                 # Release item
                 self.grasp
+
+                # Tuck arm 
+                self.move_arm(self.tuck_arm)
                 
                 # Reply
                 self.say("Here you go")
@@ -444,10 +454,10 @@ class run_tiago:
 
     def save_pose(self, array):
         self.markerPoses = array.markers
-        print(markerPoses)
+        print(self.markerPoses)
 
     def get_marker_pose(self, id):
-        for marker in tiagoPose:
+        for marker in self.markerPoses:
             if marker.id == id:
                 rospy.loginfo("found aruco marker id number {0}".format(id))
                 print(marker.pose)
