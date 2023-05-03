@@ -437,7 +437,8 @@ class run_tiago:
         # Create a JointTrajectory message
         jtp = JointTrajectoryPoint()
         jtp.positions = [pos[0], pos[1]]
-        jtp.time_from_start = rospy.Duration(2.0)
+        jtp.velocities = [0.0, 0.0]
+        jtp.time_from_start = rospy.Duration(4.0)
 
         # Set the joint names for the trajectory
         goal = FollowJointTrajectoryGoal()
