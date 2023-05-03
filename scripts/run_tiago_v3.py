@@ -46,7 +46,7 @@ class run_tiago:
         self.linear_speed = rospy.get_param("~start_linear_speed", 0.2) #m/s
         self.angular_speed = rospy.get_param("~start_angular_speed", 0.3) #rad/s
         self.global_origin = np.array([0, 0, 0])
-        self.current_state = np.array([0, 0.25, 0])
+        self.current_state = np.array([-0.35, 0, 0])
         self.markerPoses = None
         
         self.aruco_pos = [1.5, 1.6]      # place to check aruco
