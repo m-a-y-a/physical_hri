@@ -78,7 +78,9 @@ class run_tiago:
         self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)       # move forward (free_space[1]==aruco_pos[1])
         rospy.loginfo("Arrived at free space")
 
-        self.simulation_test_v3()
+        rospy.loginfo("Starting test to retreive item")
+        self.simulation_test_v4()
+        rospy.loginfo("Done test")
 
     def simulation_test_v3(self):
   
@@ -92,12 +94,11 @@ class run_tiago:
         
         global_x = 0.95 
         global_y = -0.37
-        msg = "item"
 
         ############################################
 
         # Reply
-        self.say("Yes, I will get you the " + msg)
+        # self.say("Yes, I will get you the " + msg)
 
         local_y = global_x - self.body_to_midline   # used as y value for robot
         local_x = global_y - self.center_to_palm    # used as x value for robot
@@ -117,7 +118,7 @@ class run_tiago:
         # Move arm
         self.move_arm(self.right_arm_full_extension)
 
-        self.move_to([local_x, self.aruco_pos[1] -90], 1) # moving to adjusted position calculation side-to-side
+        self.move_to([local_x, self.aruco_pos[1], -90], 1) # moving to adjusted position calculation side-to-side
         self.move_to([local_x, local_y, -90], 0)          # moving to adjusted position calculation forwards
         rospy.loginfo("Moved sideways by %s, Moved forward by %s", local_x, local_y) #ADDED FOR DEBUG
 
@@ -141,10 +142,9 @@ class run_tiago:
         self.grasp
                 
         # Reply
-        self.say("Here you go")
+        # self.say("Here you go")
 
         #############################################
-        rospy.loginfo("Done.")
 
 
     def simulation_test_v4(self):
@@ -160,11 +160,11 @@ class run_tiago:
 
         global_x = 0.95 
         global_y = -0.37
-        msg = "item"
+ 
         ############################################
 
         # Reply
-        self.say("Yes, I will get you the " + msg)
+        # self.say("Yes, I will get you the " + msg)
 
         local_y = global_x - self.center_to_palm
         local_x = global_y + self.body_to_midline
@@ -184,7 +184,7 @@ class run_tiago:
         # Move arm
         self.move_arm(self.right_arm_full_extension)
 
-        self.move_to([self.aruco_pos[0] + local_x, self.aruco_pos[1] -90], 1)               # moving to adjusted position calculation side-to-side
+        self.move_to([self.aruco_pos[0] + local_x, self.aruco_pos[1], -90], 1)               # moving to adjusted position calculation side-to-side
         self.move_to([self.aruco_pos[0] + local_x,  self.aruco_pos[1] + local_y, -90], 0)   # moving to adjusted position calculation forwards
         rospy.loginfo("Moved sideways by %s, Moved forward by %s", local_x, local_y)        #ADDED FOR DEBUG
 
@@ -208,10 +208,9 @@ class run_tiago:
         self.grasp
                                 
         # Reply
-        self.say("Here you go")
+        # self.say("Here you go")
 
         #############################################
-        rospy.loginfo("Done.")
 
         
     def play_motion(self, motion_name, block=False):
