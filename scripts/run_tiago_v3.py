@@ -49,8 +49,8 @@ class run_tiago:
         self.current_state = np.array([-0.35, 0, 0])
         self.markerPoses = None
         
-        self.aruco_pos = [1.925, 1.6]      # place to check aruco
-        self.free_space = [1.25, 1.6]    #center of the "room"
+        self.aruco_pos = [1.925, 1.35]      # place to check aruco
+        self.free_space = [1.25, 1.35]    #center of the "room"
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
