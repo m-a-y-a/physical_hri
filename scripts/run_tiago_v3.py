@@ -90,23 +90,14 @@ class run_tiago:
         self.move_head_to_position(self.head_rot_table)
         rospy.sleep(7)
 
-        for i in range(10):
-            rospy.loginfo("trying to find read markers")
-            self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
-            if self.aruco_markers:
-                rospy.loginfo("{0}".format(self.aruco_markers))
-                try:
-                    # self.save_pose(self.aruco_markers)
-                    self.get_marker_pose(8)
-                    rospy.loginfo("got water bottle marker pose")
-                    rospy.loginfo("End the pose subscriber")
-                    rospy.sleep(10)
-                    break
-                except Exception as e:
-                    rospy.loginfo("there was an error: {0}".format(e))
-                    continue
-
-
+        
+        rospy.loginfo("trying to find read markers")
+        msg = rospy.wait_for_message('aruco_marker_publisher/markers', MarkerArray)
+        self.save_pose(msg)
+        rospy.loginfo("End the pose subscriber")
+        rospy.sleep(3)
+        # self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
+            
         # Move back to center
         self.move_to([self.aruco_pos[0], self.aruco_pos[1], -180], 2)       # turn right
         self.move_to([self.free_space[0], self.aruco_pos[1], 180], 0)       # move forward
@@ -495,7 +486,6 @@ class run_tiago:
 
     def save_pose(self, array):
         self.markerPoses = array.markers
-        print(self.markerPoses)
 
     def get_marker_pose(self, id):
         for marker in self.markerPoses:
