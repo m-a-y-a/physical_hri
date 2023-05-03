@@ -42,7 +42,7 @@ class run_tiago:
 
         # Class variables
         self.aruco_pos_dict = {8: [0, 0, 0], 9: [0, 0, 0], 10: [0, 0, 0], 11: [0, 0, 0], 12: [0, 0, 0]}    
-        self.aruco_dictionary = {"water bottle": 8, "medicine bottle": 12, "oats": 11, "mixed nuts": 10, "vitamin": 9}
+        self.aruco_dictionary = {"water bottle": 8, "medicine bottle": 12, "oats": 11, "mixed nuts": 10, "mixed vitamin": 9}
         self.linear_speed = rospy.get_param("~start_linear_speed", 0.2) #m/s
         self.angular_speed = rospy.get_param("~start_angular_speed", 0.3) #rad/s
         self.global_origin = np.array([0, 0, 0])
