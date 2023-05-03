@@ -50,8 +50,8 @@ class run_tiago:
         self.current_state = np.array([-0.35, 0, 0])
         self.markerPoses = None
         
-        self.aruco_pos = [1.925, 1.35]      # place to check aruco
-        self.free_space = [1.25, 1.35]    #center of the "room"
+        self.aruco_pos = [1.925, 1.45]      # place to check aruco
+        self.free_space = [1.25, 1.45]    #center of the "room"
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
@@ -313,7 +313,7 @@ class run_tiago:
         :distance: meters or radians to move
         :direction: 0 for x-direction, 1 for y-direction, 2 for z-direction/turning
         """
-        rate = 30
+        rate = 35
         r = rospy.Rate(rate)
 
         # Initializing variables
@@ -435,18 +435,17 @@ class run_tiago:
         self.head.wait_for_server()
 
         # Create a JointTrajectory message
-        jtp = JointTrajectoryPoint()
-        jtp.positions = [pos[0], pos[1]]
-        jtp.velocities = [0.0, 0.0]
-        jtp.time_from_start = rospy.Duration(4.0)
+        jointTraj = JointTrajectory()
+        jointTraj.joint_names = ['head_1_joint', 'head_2_joint']
+        jointTraj.points.append(JointTrajectoryPoint())
+        jointTraj.points[0].positions = [pos[0], pos[1]]
+        jointTraj.points[0].time_from_start = rospy.Duration(3)
+        rospy.sleep(1)
 
         # Set the joint names for the trajectory
         goal = FollowJointTrajectoryGoal()
-        goal.trajectory.joint_names = ['head_1_joint', 'head_2_joint']
-        goal.trajectory.header.stamp = rospy.Time.now()
-        goal.trajectory.points.append(jtp)
-        # goal.trajectory.points[0].positions = pos
-        # goal.trajectory.points[0].time_from_start = rospy.Duration(2.0)
+        goal.trajectory = jointTraj
+        goal.goal_time_tolerance = rospy.Duration(0)
 
         self.head.send_goal(goal)
         self.head.wait_for_result()
