@@ -421,7 +421,7 @@ class run_tiago:
                 self.say("Sorry, I don't recognize that command.")
     
     def keep_head_still(self):
-        head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal)
+        head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
         motion = DisableActionGoal()
         rospy.loginfo("disabling head manager")
         motion.goal.duration = 10.0
