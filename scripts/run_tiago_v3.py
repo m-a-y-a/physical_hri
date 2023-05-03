@@ -85,10 +85,9 @@ class run_tiago:
         rospy.loginfo("Arrived at Table")
 
         # Take photo
+        rospy.loginfo("Please start the pose subscriber")
         self.move_torso(self.torso_height_aruco)
         self.move_head_to_position(self.head_rot_table)
-
-        rospy.loginfo("Please start the pose subscriber")
         rospy.sleep(7)
 
         for i in range(10):

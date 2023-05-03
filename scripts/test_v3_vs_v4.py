@@ -554,7 +554,7 @@ class run_tiago:
                 continue
         return None 
 
-    def calc_coords_of_object(self,pose):
+    def calc_coords_of_object(self, pose):
         x_from_base = pose.position.x
         y_from_base = pose.position.y
         z_from_base = pose.position.z
