@@ -433,6 +433,7 @@ class run_tiago:
 
         # Create a publisher to send joint trajectory commands
         self.head.wait_for_server()
+        rospy.sleep(1)
 
         # Create a JointTrajectory message
         jointTraj = JointTrajectory()
