@@ -87,6 +87,7 @@ class run_tiago:
         self.move_to([self.free_space[0], self.aruco_pos[1], -90], 0)       # move forward (free_space[1]==aruco_pos[1])
         rospy.loginfo("Arrived at free space")
 
+        '''
         # Move to get aruco measures
         self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)         # turn left
         self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)          # move forward
@@ -116,14 +117,13 @@ class run_tiago:
         self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)        # turn to user
         rospy.loginfo("Arrived at free space")
     
-
-        '''
+        
         # self.play_motion('home', block = True)
         
         # Call for speech recognition
-        self.send_cmd()
+        # self.send_cmd()
 
-        self.rate.sleep()
+        # self.rate.sleep()
         '''
 
         self.simulation_test_v3()
