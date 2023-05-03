@@ -434,7 +434,7 @@ class run_tiago:
         # Create a publisher to send joint trajectory commands
         self.head.wait_for_server()
 
-        Create a JointTrajectory message
+        # Create a JointTrajectory message
         jtp = JointTrajectoryPoint()
         jtp.positions = [pos[0], pos[1]]
         jtp.time_from_start = rospy.Duration(2.0)
@@ -447,8 +447,39 @@ class run_tiago:
         # goal.trajectory.points[0].positions = pos
         # goal.trajectory.points[0].time_from_start = rospy.Duration(2.0)
 
-        self.head.wait_for_result()
         self.head.send_goal(goal)
+        self.head.wait_for_result()
+
+    # def move_arm(self, pos):
+    #     self.arm_right.wait_for_server()
+        
+    #     jtp = JointTrajectoryPoint()
+    #     jtp.velocities = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    #     jtp.positions = [pos[0], pos[1], pos[2], pos[3], pos[4], pos[5], pos[6]]
+    #     jtp.time_from_start = rospy.Duration(2.0)
+        
+    #     goal = FollowJointTrajectoryGoal()
+    #     goal.trajectory.joint_names = ['arm_right_1_joint', 'arm_right_2_joint', 'arm_right_3_joint', 'arm_right_4_joint', 'arm_right_5_joint', 'arm_right_6_joint', 'arm_right_7_joint']
+    #     goal.trajectory.header.stamp = rospy.Time.now()
+    #     goal.trajectory.points.append(jtp)
+    #     self.arm_right.send_goal(goal)
+    #     self.arm_right.wait_for_result()
+
+
+    # def move_torso(self, height):
+    #     self.torso.wait_for_server()
+
+    #     jtp = JointTrajectoryPoint()
+    #     jtp.time_from_start = rospy.Duration(2)
+    #     jtp.positions.append(height)
+
+    #     goal = FollowJointTrajectoryGoal()
+    #     goal.trajectory.joint_names.append('torso_lift_joint')
+    #     goal.trajectory.header.stamp = rospy.Time.now()
+    #     goal.trajectory.points.append(jtp)
+
+    #     self.torso.send_goal(goal)
+    #     self.torso.wait_for_result()
 
 
     def save_pose(self, array):
