@@ -50,7 +50,7 @@ class run_tiago:
         self.current_state = np.array([-0.35, 0, 0])
         self.markerPoses = None
         
-        self.aruco_pos = [1.925, 1.45]      # place to check aruco
+        self.aruco_pos = [1.70, 1.45]      # place to check aruco
         self.free_space = [1.25, 1.45]    #center of the "room"
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
@@ -59,6 +59,7 @@ class run_tiago:
         self.torso_height_table = 0.24
         self.torso_height_aruco = 0.30
         self.torso_height_dropoff_table = 0.05
+        self.torso_height_home = 0.14
         self.head_rot_table = [0.00, -0.50]
         self.body_to_midline = 0.225
         self.center_to_palm = 0.8
@@ -112,7 +113,7 @@ class run_tiago:
         self.move_to([self.free_space[0], self.aruco_pos[1], 60], 2)        # turn to user
         rospy.loginfo("Arrived at free space")
     
-        self.play_motion('home', block = True)
+        self.move_torso(self.torso_height_home)
         
         # Call for speech recognition
         self.send_cmd()
@@ -258,6 +259,9 @@ class run_tiago:
                 # Release item
                 self.grasp
 
+                # Raise torso to normal height 
+                self.move_torso(self.torso_height_home)
+                
                 # Tuck arm 
                 self.move_arm(self.tuck_arm)
                 
