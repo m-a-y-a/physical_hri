@@ -371,7 +371,7 @@ class run_tiago:
         while end == False:
             cmd = self.get_voice_cmd()
             
-            if (cmd != None):
+            try:
                 # Perform action based on word
                 if (cmd == "hello"):
                     self.play_motion('wave', block = True)
@@ -418,8 +418,9 @@ class run_tiago:
                     end = True
                 else:
                     self.say("Sorry, I don't recognize that command."
-        else:
-            rospy.loginfo("No speech detected.")
+         except Exception as e:
+            rospy.logerr("Exception %s occurred", str(e))
+            continue
     
     def keep_head_still(self):
         head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
