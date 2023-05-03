@@ -92,11 +92,13 @@ class run_tiago:
         for i in range(10):
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             if self.aruco_markers:
-                rospy.loginfo("Found the markers")
+                rospy.loginfo("trying to find read markers")
                 try:
                     self.save_pose(self.aruco_markers)
                     rospy.loginfo("saved the markers")
+                    rospy.loginfo("End the pose subscriber")
                 except Exception as e:
+                    rospy.loginfo("there was an error: {0}".format(e))
                     continue
 
 
