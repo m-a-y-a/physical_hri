@@ -93,8 +93,11 @@ class run_tiago:
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             if self.aruco_markers:
                 rospy.loginfo("Found the markers")
-                self.save_pose(self.aruco_markers)
-                rospy.loginfo("save the markers")
+                try:
+                    self.save_pose(self.aruco_markers)
+                    rospy.loginfo("saved the markers")
+                except Exception as e:
+                    continue
 
 
         if not self.aruco_markers:
