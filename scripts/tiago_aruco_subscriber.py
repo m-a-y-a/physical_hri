@@ -135,12 +135,7 @@ class run_tiago:
             rospy.loginfo("Please start the pose subscriber")
             rospy.sleep(7)
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, save_pose)
-            pose = self.get_marker_pose(10)
-            [x, y] = calc_coords_of_object(pose)
-            rospy.loginfo("got coords: {0}, {1}".format(x, y))
             
-            # Call AruCo tag identifier
-            item_pos = [x, y]
 
             # # Move back to center
             # self.move_to([self.aruco_pos[0], self.aruco_pos[1], 180], 2)       # turn right

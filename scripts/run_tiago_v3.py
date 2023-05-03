@@ -24,7 +24,8 @@ class run_tiago:
     def __init__(self, mode=1):
         self.gripper_pub = rospy.Publisher("/parallel_gripper_right_controller/command", JointTrajectory, queue_size=5, latch=True)
         self.arm_pub = rospy.Publisher("/arm_right_controller/command", JointTrajectory, queue_size=5, latch=True)
-        self.head_pub = rospy.Publisher('/head_controller/point_head_action/goal', PointHeadActionGoal, queue_size=1, latch=True)
+        # self.head_pub = rospy.Publisher('/head_controller/point_head_action/goal', PointHeadActionGoal, queue_size=1, latch=True)
+        self.head_pub = rospy.Publisher('/head_controller/follow_joint_trajectory', FollowJointTrajectoryAction, queue_size=1, latch=True)
         self.base_pub = rospy.Publisher("/mobile_base_controller/cmd_vel", Twist, queue_size=5)
         self.pose_pub = rospy.Publisher("/cart_pose", Pose2D, queue_size=5)
         self.way_pub = rospy.Publisher("/cart_goal_position", Pose2D, queue_size=5, latch=True)
@@ -92,11 +93,9 @@ class run_tiago:
             self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             if self.aruco_markers:
                 rospy.loginfo("Found the markers")
-                for key in self.aruco_pos_dict:
-                    pose = self.get_marker_pose(key)
-                    [global_x, global_y] = self.calc_coords_of_object(pose)
-                    self.aruco_pos_dict[key] = [global_x, global_y, 0]
-                break
+                self.save_pose(self.aruco_markers)
+                rospy.loginfo("save the markers")
+
 
         if not self.aruco_markers:
             rospy.loginfo("sorry, could not find the markers")
@@ -420,7 +419,7 @@ class run_tiago:
                 self.say("Sorry, I don't recognize that command.")
     
     def keep_head_still(self):
-        head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal)
+        head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
         motion = DisableActionGoal()
         rospy.loginfo("disabling head manager")
         motion.goal.duration = 10.0
@@ -441,10 +440,12 @@ class run_tiago:
         goal = FollowJointTrajectoryGoal()
         goal.trajectory.joint_names = ['head_1_joint', 'head_2_joint']
         goal.trajectory.header.stamp = rospy.Time.now()
-        goal.trajectory.points.append(jtp)
+        # goal.trajectory.points.append(jtp)
+        goal.trajectory.points[0].positions = [pos[0], pos[1]]
+        goal.trajectory.points[0].time_from_start = rospy.Duration(2.0)
 
-        self.head.send_goal(goal)
         self.head.wait_for_result()
+        self.head.send_goal(goal)
 
         # Disable head movement
         self.keep_head_still()
