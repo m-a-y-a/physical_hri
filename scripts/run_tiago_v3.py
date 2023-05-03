@@ -418,9 +418,9 @@ class run_tiago:
                     end = True
                 else:
                     self.say("Sorry, I don't recognize that command."
-         except Exception as e:
-            rospy.logerr("Exception %s occurred", str(e))
-            continue
+            except Exception as e:
+                rospy.logerr("Exception %s occurred", str(e))
+                continue
     
     def keep_head_still(self):
         head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
