@@ -422,7 +422,7 @@ class run_tiago:
         head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
         motion = DisableActionGoal()
         rospy.loginfo("disabling head manager")
-        motion.goal.duration = 10.0
+        motion.goal.duration = 20.0
         head_mgr_client.publish(motion)
         
         rospy.sleep(3)
