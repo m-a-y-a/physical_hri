@@ -79,9 +79,7 @@ class run_tiago:
         rospy.loginfo("Arrived at free space")
 
         # Move to get aruco measures
-        self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)         # turn left
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)          # move forward
-        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 2)        # turn to face table
+        self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)        # move sideways to table
         rospy.loginfo("Arrived at Table")
 
         # Take photo
