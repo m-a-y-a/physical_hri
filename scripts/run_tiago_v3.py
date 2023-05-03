@@ -379,54 +379,56 @@ class run_tiago:
         end = False
         while end == False:
             cmd = self.get_voice_cmd()
-            rospy.logdebug("Voice detected %s", cmd)
             
-            # Perform action based on word
-            if (cmd == "hello"):
-                self.play_motion('wave', block = True)
-                self.say("Hi, my name is Tiago. What’s yours?")
-            elif(cmd == "good"):
-                self.say("That’s great! How can I help you today?")
-            elif (cmd == "bad"):
-                self.say("I’m sorry to hear that. How can I help you today?")
-            elif (len(cmd) >= 10):
-                if (cmd[0:9] == "my name is"):
-                    #Split command to get name
-                    cmd_list = cmd.split()
-                    if (len(cmd_list) >= 3):
-                        name = cmd.split()[3]
-                        self.say("It’s nice to meet you " + name + ". How has your day been?")
-                elif (len(cmd) >= 18):
-                    if (cmd[0:17] == "can you get me the"):
-                        #Split command to get item
+            if (cmd != None):
+                # Perform action based on word
+                if (cmd == "hello"):
+                    self.play_motion('wave', block = True)
+                    self.say("Hi, my name is Tiago. What’s yours?")
+                elif(cmd == "good"):
+                    self.say("That’s great! How can I help you today?")
+                elif (cmd == "bad"):
+                    self.say("I’m sorry to hear that. How can I help you today?")
+                elif (len(cmd) >= 10):
+                    if (cmd[0:9] == "my name is"):
+                        #Split command to get name
                         cmd_list = cmd.split()
-                        if "medicine" in cmd_list:
-                            item = "medicine bottle"
-                            self.do_cmd(item)
-                        if "water" in cmd_list:
-                            item = "water bottle"
-                            self.do_cmd(item)
-                        if "nuts" in cmd_list:
-                            item = "mixed nuts"
-                            self.do_cmd(item)
-                        if "vitamin" in cmd_list:
-                            item = "mixed vitamin"
-                            self.do_cmd(item)
-                        if "oats" in cmd_list:
-                            item = "oats"
-                            self.do_cmd(item)
-                        else:
-                            self.say("I'm sorry, I don't know that item.")
-                            
-            elif (cmd == "thank you"):
-                self.do_cmd(cmd)
-            elif (cmd == "this is wrong"):
-                self.do_cmd(cmd)
-            elif (cmd == "i am done"):
-                self.do_cmd(cmd)
-                end = True
-            else:
-                self.say("Sorry, I don't recognize that command.")
+                        if (len(cmd_list) >= 3):
+                            name = cmd.split()[3]
+                            self.say("It’s nice to meet you " + name + ". How has your day been?")
+                    elif (len(cmd) >= 18):
+                        if (cmd[0:17] == "can you get me the"):
+                            #Split command to get item
+                            cmd_list = cmd.split()
+                            if "medicine" in cmd_list:
+                                item = "medicine bottle"
+                                self.do_cmd(item)
+                            if "water" in cmd_list:
+                                item = "water bottle"
+                                self.do_cmd(item)
+                            if "nuts" in cmd_list:
+                                item = "mixed nuts"
+                                self.do_cmd(item)
+                            if "vitamin" in cmd_list:
+                                item = "mixed vitamin"
+                                self.do_cmd(item)
+                            if "oats" in cmd_list:
+                                item = "oats"
+                                self.do_cmd(item)
+                            else:
+                                self.say("I'm sorry, I don't know that item.")
+
+                elif (cmd == "thank you"):
+                    self.do_cmd(cmd)
+                elif (cmd == "this is wrong"):
+                    self.do_cmd(cmd)
+                elif (cmd == "i am done"):
+                    self.do_cmd(cmd)
+                    end = True
+                else:
+                    self.say("Sorry, I don't recognize that command."
+        else:
+            rospy.loginfo("No speech detected.")
     
     def keep_head_still(self):
         head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
