@@ -52,7 +52,7 @@ class run_tiago:
         
         self.aruco_pos = [1.80, 1.45]      # place to check aruco
         self.free_space = [1.25, 1.45]    #center of the "room"
-        self.drop_off_pos = [2.25, 1.15] # place to drop object
+        self.drop_off_pos = [1.80, 1.15] # place to drop object
 
         self.right_arm_full_extension = [1.5, 0.46, 0.09, 0.39, -1.45, 0.03, -0.00]
         self.tuck_arm = [-1.10, 1.47, 2.71, 1.71, -1.57, 1.37, -2.24]
@@ -62,7 +62,7 @@ class run_tiago:
         self.torso_height_home = 0.14
         self.head_rot_table = [0.00, -0.50]
         self.body_to_midline = 0.225
-        self.center_to_palm = 0.8
+        self.center_to_palm = 0.7
 
         # Speech recogniser
         self.listener = sr.Recognizer()
@@ -222,7 +222,7 @@ class run_tiago:
                 rospy.loginfo("Arrived at Table")
 
                 # Move back a little bit for the arm
-                offset = 0.2 #move 20 cm back for arm 
+                offset = 0.35 #move 35 cm back for arm 
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset, -90], 0) # move backwards
 
                 # Offer arm
@@ -250,10 +250,13 @@ class run_tiago:
                 self.move_to([local_x, self.aruco_pos[1] - offset, -90], 0)                   # move backwards
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset , -90], 1)        # move sideways
                         
-                self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset, 0], 2)           # turn left
-                self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 0], 0)        # move left to drop off x
-                self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 90], 2)       # turn left
-                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)             # move to side of drop off table
+                self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset, 90], 2)           # turn 180 degrees
+                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)              # move forward
+                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 60], 2)              # turn to drop off table
+
+                #self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 0], 0)        # move left to drop off x
+                #self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 90], 2)       # turn left
+                #self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)             # move to side of drop off table
                 rospy.loginfo("Arrived at drop off")
                         
                 # Lower torso
@@ -266,13 +269,18 @@ class run_tiago:
                 result = self.grasp()
 
                 # Raise torso to normal height 
-                self.move_torso(self.torso_height_home)
+                self.move_torso(self.torso_height_table)
                 
                 # Tuck arm 
                 self.move_arm(self.tuck_arm)
                 
                 # Reply
                 self.say("Here you go")
+
+                # turn to face forward 
+                self.move_torso(self.torso_height_home)                                 #lower torso to normal height
+                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 2)       #turn to front
+
             except Exception as e:
                 print(e)
     
@@ -365,7 +373,7 @@ class run_tiago:
     def get_voice_cmd(self):
         try:
             rospy.loginfo("in get_voice_cmd")
-            self.say("I am listening")
+            self.say("Hi, my name is Tiago. What can I get for you?")
 
             with sr.Microphone() as src:
                 self.listener.adjust_for_ambient_noise(src)
