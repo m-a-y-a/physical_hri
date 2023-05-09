@@ -95,7 +95,7 @@ class run_tiago:
         msg = rospy.wait_for_message('aruco_marker_publisher/markers', MarkerArray)
         self.save_pose(msg)
         rospy.loginfo("End the pose subscriber")
-        rospy.sleep(3)
+        rospy.sleep(12)
         # self.aruco_markers = rospy.Subscriber('aruco_marker_publisher/markers', MarkerArray, self.save_pose)
             
         # Move back to center
