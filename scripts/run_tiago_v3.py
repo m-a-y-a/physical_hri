@@ -387,28 +387,25 @@ class run_tiago:
                         if (len(cmd_list) >= 3):
                             name = cmd.split()[3]
                             self.say("It’s nice to meet you " + name + ". How has your day been?")
-                    elif (len(cmd) >= 18):
-                        if (cmd[0:17] == "can you get me the"):
-                            #Split command to get item
-                            cmd_list = cmd.split()
-                            if "medicine" in cmd_list:
-                                item = "medicine bottle"
-                                self.do_cmd(item)
-                            if "water" in cmd_list:
-                                item = "water bottle"
-                                self.do_cmd(item)
-                            if "nuts" in cmd_list:
-                                item = "mixed nuts"
-                                self.do_cmd(item)
-                            if "vitamin" in cmd_list:
-                                item = "mixed vitamin"
-                                self.do_cmd(item)
-                            if "oats" in cmd_list:
-                                item = "oats"
-                                self.do_cmd(item)
-                            else:
-                                self.say("I'm sorry, I don't know that item.")
-
+                    else:
+                        cmd_list = cmd.split()
+                        if "medicine" in cmd_list:
+                            item = "medicine bottle"
+                            self.do_cmd(item)
+                        elif "water" in cmd_list:
+                            item = "water bottle"
+                            self.do_cmd(item)
+                        elif "nuts" in cmd_list:
+                            item = "mixed nuts"
+                            self.do_cmd(item)
+                        elif "vitamin" in cmd_list:
+                            item = "mixed vitamin"
+                            self.do_cmd(item)
+                        elif "oats" in cmd_list:
+                            item = "oats"
+                            self.do_cmd(item)
+                        else:
+                            self.say("I'm sorry, I don't know that item.")
                 elif (cmd == "thank you"):
                     self.do_cmd(cmd)
                 elif (cmd == "this is wrong"):
@@ -417,7 +414,7 @@ class run_tiago:
                     self.do_cmd(cmd)
                     end = True
                 else:
-                    self.say("Sorry, I don't recognize that command."
+                    self.say("Sorry, I don't recognize that command.")
             except Exception as e:
                 rospy.logerr("Exception %s occurred", str(e))
                 continue
