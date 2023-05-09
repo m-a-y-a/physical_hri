@@ -421,6 +421,7 @@ class run_tiago:
     
     def keep_head_still(self):
         head_mgr_client = rospy.Publisher('/pal_head_manager/disable/goal', DisableActionGoal, queue_size=1)
+        rospy.sleep(3)
         motion = DisableActionGoal()
         rospy.loginfo("disabling head manager")
         motion.goal.duration = 60.0
