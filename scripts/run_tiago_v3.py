@@ -163,7 +163,7 @@ class run_tiago:
     def do_cmd(self,msg):
         if (msg == "thank you"):
             # Reset: move back to center
-            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
+            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn left
             self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
             self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
             self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2)        # turn
@@ -176,7 +176,7 @@ class run_tiago:
             
         elif (msg == "this is wrong"):
             # Reset: move back to center
-            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
+            self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn left
             self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
             self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
             self.move_to([self.free_space[0], self.drop_off_pos[1], -90], 2)        # turn
@@ -248,12 +248,12 @@ class run_tiago:
 
                 # Bring item to user
                 self.move_to([local_x, self.aruco_pos[1] - offset, -90], 0)                   # move backwards
-                self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)         # move sideways
+                self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset , -90], 1)        # move sideways
                         
-                self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 2)           # turn left
-                self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 0], 0)        # move left to drop off x
-                self.move_to([self.drop_off_pos[0], self.aruco_pos[1], 90], 2)       # turn left
-                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)    # move to side of drop off table
+                self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset, 0], 2)           # turn left
+                self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 0], 0)        # move left to drop off x
+                self.move_to([self.drop_off_pos[0], self.aruco_pos[1] - offset, 90], 2)       # turn left
+                self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 90], 0)             # move to side of drop off table
                 rospy.loginfo("Arrived at drop off")
                         
                 # Lower torso
@@ -509,7 +509,7 @@ class run_tiago:
             if marker.id == id:
                 rospy.loginfo("found aruco marker id number {0}".format(id))
                 print(marker.pose)
-                return marker.pose
+                return marker.pose.pose
             else:
                 continue
         return None 
