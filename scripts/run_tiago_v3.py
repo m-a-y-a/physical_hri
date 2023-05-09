@@ -174,7 +174,7 @@ class run_tiago:
             # Reply
             self.say("You’re welcome. What else can I get you?")
             
-        elif ("this is wrong"):
+        elif (msg == "this is wrong"):
             # Reset: move back to center
             self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn right
             self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
@@ -187,7 +187,7 @@ class run_tiago:
             # Reply
             self.say("I’m sorry for my mistake. Can I get you something else?")
 
-        elif ("i am done"):
+        elif (msg == "i am done"):
            rospy.loginfo("End of interaction")
            # Reply
            self.say("Okay, have a wonderful day!")
