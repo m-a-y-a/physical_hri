@@ -50,7 +50,7 @@ class run_tiago:
         self.current_state = np.array([-0.35, 0, 0])
         self.markerPoses = None
         
-        self.aruco_pos = [1.70, 1.45]      # place to check aruco
+        self.aruco_pos = [1.80, 1.45]      # place to check aruco
         self.free_space = [1.25, 1.45]    #center of the "room"
         self.drop_off_pos = [2.25, 1.15] # place to drop object
 
@@ -197,11 +197,13 @@ class run_tiago:
            
         else:
             rospy.loginfo("Requested item")
-
+            rospy.loginfo("trying to look for item {0}",format(msg))
             try:
                 # Call AruCo tag identifier
                 item_id = self.aruco_dictionary[msg]
                 pose = self.get_marker_pose(item_id)
+                rospy.loginfo("got the marker pose for {0}".format(msg))
+
                 global_x = pose.position.x + self.aruco_pos[1]
                 global_y = pose.position.y + self.aruco_pos[0]
 
@@ -211,12 +213,18 @@ class run_tiago:
                 local_y = global_x - self.center_to_palm     # used as y value for robot
                 local_x = global_y + self.body_to_midline    # used as x value for robot
 
+                rospy.loginfo("trying to move back to the table")
+                
                 # Move to table
                 self.move_to([self.free_space[0], self.aruco_pos[1], 0], 2)      # turn right
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 0)       # move forward
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 2)     # turn to face table
                 rospy.loginfo("Arrived at Table")
-                        
+
+                # Move back a little bit for the arm
+                offset = 0.2 #move 20 cm back for arm 
+                self.move_to([self.aruco_pos[0], self.aruco_pos[1] - offset, -90], 0) # move backwards
+
                 # Offer arm
                 self.move_torso(self.torso_height_table)
                 self.play_motion('offer_right', block = True)
@@ -227,8 +235,9 @@ class run_tiago:
                 # Move arm
                 self.move_arm(self.right_arm_full_extension)
 
-                self.move_to([local_x, self.aruco_pos[1], -90], 1) # moving to adjusted position calculation side-to-side
-                self.move_to([local_x, local_y, -90], 0)          # moving to adjusted position calculation forwards
+
+                self.move_to([local_x, self.aruco_pos[1] - offset, -90], 1) # moving to adjusted position calculation side-to-side
+                self.move_to([local_x, local_y, -90], 0)                    # moving to adjusted position calculation forwards
                 rospy.loginfo("Moved sideways by %s, Moved forward by %s", local_x, local_y) #ADDED FOR DEBUG
 
                 # Grab item
@@ -360,7 +369,7 @@ class run_tiago:
                 rospy.loginfo("trying google recognition")
                 cmd = self.listener.recognize_google(audio, language = "en-EN")
                 cmd = cmd.lower()   
-                print(cmd)
+                print("cmd is: {0}".format(cmd))
                 return cmd
         except Exception as e:
             rospy.logerr("Exception %s occurred", str(e))
@@ -369,8 +378,8 @@ class run_tiago:
         cmd = ""
         end = False
         while end == False:
+            rospy.loginfo("social interaction will begin shortly")
             cmd = self.get_voice_cmd()
-            rospy.loginfo("please begin social interaction now")
             try:
                 #Split command
                 cmd_list = cmd.split()
@@ -394,6 +403,7 @@ class run_tiago:
                             item = "medicine bottle"
                             self.do_cmd(item)
                         elif "water" in cmd_list:
+                            rospy.loginfo("looking for the water")
                             item = "water bottle"
                             self.do_cmd(item)
                         elif "nuts" in cmd_list:
