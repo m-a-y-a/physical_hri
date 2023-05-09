@@ -162,7 +162,7 @@ class run_tiago:
         
     def do_cmd(self,msg):
         if (msg == "thank you"):
-            # Reset: move back to centerfin
+            # Reset: move back to center
             self.move_to([self.drop_off_pos[0], self.drop_off_pos[1], 180], 2)      # turn left
             self.move_to([self.free_space[0], self.drop_off_pos[1], 180], 0)        # move forward
             self.current_state[2] = -180                                            # change sign convention (-180==180 deg)
