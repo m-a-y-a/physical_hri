@@ -380,6 +380,8 @@ class run_tiago:
         while end == False:
             rospy.loginfo("social interaction will begin shortly")
             cmd = self.get_voice_cmd()
+            if cmd == None:
+                pass
             try:
                 #Split command
                 cmd_list = cmd.split()
