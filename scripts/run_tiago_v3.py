@@ -91,7 +91,7 @@ class run_tiago:
         rospy.sleep(7)
 
         
-        rospy.loginfo("trying to find read markers")
+        rospy.loginfo("trying to read markers")
         msg = rospy.wait_for_message('aruco_marker_publisher/markers', MarkerArray)
         self.save_pose(msg)
         rospy.loginfo("End the pose subscriber")
@@ -426,7 +426,7 @@ class run_tiago:
         motion.goal.duration = 60.0
         head_mgr_client.publish(motion)
         
-        rospy.sleep(3)
+        #rospy.sleep(3)
 
     def move_head_to_position(self, pos):
         # Disable head movement
@@ -442,7 +442,7 @@ class run_tiago:
         jointTraj.points.append(JointTrajectoryPoint())
         jointTraj.points[0].positions = [pos[0], pos[1]]
         jointTraj.points[0].time_from_start = rospy.Duration(3)
-        rospy.sleep(1)
+        #rospy.sleep(1)
 
         # Set the joint names for the trajectory
         goal = FollowJointTrajectoryGoal()
