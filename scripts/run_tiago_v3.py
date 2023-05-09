@@ -196,7 +196,7 @@ class run_tiago:
            # Send shutdown signal
            
         else:
-            rospy.loginfo("Requested item")
+            # rospy.loginfo("Requested item")
             rospy.loginfo("trying to look for item {0}",format(msg))
             try:
                 # Call AruCo tag identifier
