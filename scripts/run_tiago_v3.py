@@ -197,7 +197,7 @@ class run_tiago:
            
         else:
             # rospy.loginfo("Requested item")
-            rospy.loginfo("trying to look for item {0}",format(msg))
+            rospy.loginfo("trying to look for item {0}".format(msg))
             try:
                 # Call AruCo tag identifier
                 item_id = self.aruco_dictionary[msg]
