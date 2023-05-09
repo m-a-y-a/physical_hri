@@ -67,7 +67,7 @@ class run_tiago:
         # Speech recogniser
         self.listener = sr.Recognizer()
         
-        self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/command', Empty)
+        # self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/grasp', Empty)
 
     def run(self):
         
@@ -241,10 +241,13 @@ class run_tiago:
                 rospy.loginfo("Moved sideways by %s, Moved forward by %s", local_x, local_y) #ADDED FOR DEBUG
 
                 # Grab item
-                self.grasp
+                rospy.wait_for_service('/parallel_gripper_right_controller/grasp')
+                self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/grasp', Empty)
+                rospy.sleep(2)
+                result = self.grasp()
 
                 # Bring item to user
-                self.move_to([local_x, self.aruco_pos[1], -90], 0)                   # move backwards
+                self.move_to([local_x, self.aruco_pos[1] - offset, -90], 0)                   # move backwards
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], -90], 1)         # move sideways
                         
                 self.move_to([self.aruco_pos[0], self.aruco_pos[1], 0], 2)           # turn left
@@ -257,7 +260,10 @@ class run_tiago:
                 self.move_torso(self.torso_height_dropoff_table)
                         
                 # Release item
-                self.grasp
+                rospy.wait_for_service('/parallel_gripper_right_controller/grasp')
+                self.grasp = rospy.ServiceProxy('/parallel_gripper_right_controller/grasp', Empty)
+                rospy.sleep(2)
+                result = self.grasp()
 
                 # Raise torso to normal height 
                 self.move_torso(self.torso_height_home)
@@ -380,8 +386,6 @@ class run_tiago:
         while end == False:
             rospy.loginfo("social interaction will begin shortly")
             cmd = self.get_voice_cmd()
-            if cmd == None:
-                pass
             try:
                 #Split command
                 cmd_list = cmd.split()
@@ -505,7 +509,7 @@ class run_tiago:
             if marker.id == id:
                 rospy.loginfo("found aruco marker id number {0}".format(id))
                 print(marker.pose)
-                return marker.pose.pose
+                return marker.pose
             else:
                 continue
         return None 
