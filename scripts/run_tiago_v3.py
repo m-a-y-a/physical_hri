@@ -196,7 +196,7 @@ class run_tiago:
            # Send shutdown signal
            
         else:
-            rospy.loginfo("Request item")
+            rospy.loginfo("Requested item")
 
             try:
                 # Call AruCo tag identifier
@@ -370,8 +370,10 @@ class run_tiago:
         end = False
         while end == False:
             cmd = self.get_voice_cmd()
-            
+            rospy.loginfo("please begin social interaction now")
             try:
+                #Split command
+                cmd_list = cmd.split()
                 # Perform action based on word
                 if (cmd == "hello"):
                     self.play_motion('wave', block = True)
@@ -382,13 +384,12 @@ class run_tiago:
                     self.say("I’m sorry to hear that. How can I help you today?")
                 elif (len(cmd) >= 10):
                     if (cmd[0:9] == "my name is"):
-                        #Split command to get name
-                        cmd_list = cmd.split()
                         if (len(cmd_list) >= 3):
                             name = cmd.split()[3]
                             self.say("It’s nice to meet you " + name + ". How has your day been?")
+                    elif (cmd == "this is wrong"):
+                        self.do_cmd(cmd)
                     else:
-                        cmd_list = cmd.split()
                         if "medicine" in cmd_list:
                             item = "medicine bottle"
                             self.do_cmd(item)
@@ -408,13 +409,11 @@ class run_tiago:
                             self.say("I'm sorry, I don't know that item.")
                 elif (cmd == "thank you"):
                     self.do_cmd(cmd)
-                elif (cmd == "this is wrong"):
-                    self.do_cmd(cmd)
                 elif (cmd == "i am done"):
                     self.do_cmd(cmd)
                     end = True
                 else:
-                    self.say("Sorry, I don't recognize that command.")
+                    self.say("Sorry, I don't recognize that command. Please try again.")
             except Exception as e:
                 rospy.logerr("Exception %s occurred", str(e))
                 continue
@@ -452,6 +451,7 @@ class run_tiago:
 
         self.head.send_goal(goal)
         self.head.wait_for_result()
+        rospy.loginfo("moved head to position")
 
     # def move_arm(self, pos):
     #     self.arm_right.wait_for_server()
