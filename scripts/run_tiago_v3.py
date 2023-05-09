@@ -505,7 +505,7 @@ class run_tiago:
             if marker.id == id:
                 rospy.loginfo("found aruco marker id number {0}".format(id))
                 print(marker.pose)
-                return marker.pose
+                return marker.pose.pose
             else:
                 continue
         return None 
