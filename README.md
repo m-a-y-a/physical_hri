@@ -20,3 +20,4 @@ The run_tiago.py file creates a class called run_tiago and instantiates all ROS 
 5. send_cmd() - line 600-666: The user may then either thank the robot or tell it that the wrong item was retrieved, to which TIAGo will either express "You're welcome" or remorse for making a mistake. The TIAGo base is then moved back to the center of the space to await further requests of interactions.
 
 A visual reresentation of our code is included below:
+![code_flowchart](https://github.com/m-a-y-a/physical_hri/assets/43100445/35c5dbcb-5c9b-45c7-8cc2-3802d993789e)
