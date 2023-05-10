@@ -765,19 +765,19 @@ class run_tiago:
                 continue
         return None 
 
-"""Main Function
+"""Main Function to Create Class Instance
     
-    Initiatializes a TIAGo server node so the code can send to publisher and receive from subscriber nodes, then creates an
-    instance of the run_tiago class to instantiate all class variables. Once instantiated, it then calls the run function of 
-    the run_tiago class instance to begin the robot retrieval process.
+Initiatializes a TIAGo server node so the code can send to publisher and receive from subscriber nodes, then creates an
+instance of the run_tiago class to instantiate all class variables. Once instantiated, it then calls the run function of 
+the run_tiago class instance to begin the robot retrieval process.
     
-    Args:
-        None
+Args:
+    None
         
-    Returns:
-        None
+Returns:
+    None
     
-    """                
+"""                
 def main():
     # Start ROS node to communicate with other nodes
     rospy.init_node('tiago_server')
@@ -790,17 +790,17 @@ def main():
 
 """Main Function Called by Python
     
-    When python code is run in the terminal, this function is automatically called first (it is the python 'main' function).
-    Tries to call the main function to begin the object retrieval process or throws an exception is an error occurs during 
-    code execution/node setup.
+When python code is run in the terminal, this function is automatically called first (it is the python 'main' function).
+Tries to call the main function to begin the object retrieval process or throws an exception is an error occurs during 
+code execution/node setup.
     
-    Args:
-        None
+Args:
+    None
         
-    Returns:
-        None
+Returns:
+    None
     
-    """
+"""
 if __name__ == "__main__":
     try:
         main()
